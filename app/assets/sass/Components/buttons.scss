@@ -1,0 +1,21 @@
+.btn {
+  width: auto;
+  padding: 8px 20px;
+  border-radius: 3px;
+  border: 0;
+  outline: 0;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn-orange {
+  color: white;
+  background-color: #cf7500;
+}

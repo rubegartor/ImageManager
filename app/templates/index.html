@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>ImageManager</title>
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';"/>
+    <link rel="stylesheet" type="text/css" href="../assets/css/app.css">
+</head>
+<body>
+<div class="left-menu">
+    <button type="button" class="btn btn-block btn-orange" data-action="loadFiles">
+        <i class="fas fa-plus"></i> Añadir archivos
+    </button>
+    <button type="button" class="btn btn-block btn-orange" data-action="openConfig">
+        Configruración
+    </button>
+    <hr>
+    <div>
+        <ul class="treeview" id="treeview">
+            <li class="treeview-year">
+                <span class="treeview-caret"><i class="fas fa-angle-right"></i> 2020</span>
+                <ul class="treeview-nested">
+                    <li class="treeview-month">Enero</li>
+                    <li class="treeview-month">Febrero</li>
+                    <li class="treeview-month">Marzo</li>
+                    <li class="treeview-month">Abril</li>
+                </ul>
+            </li>
+            <li class="treeview-year">
+                <span class="treeview-caret"><i class="fas fa-angle-right"></i> 2019</span>
+                <ul class="treeview-nested">
+                    <li class="treeview-month">Enero</li>
+                    <li class="treeview-month">Febrero</li>
+                    <li class="treeview-month">Marzo</li>
+                    <li class="treeview-month">Abril</li>
+                </ul>
+            </li>
+            <li class="treeview-year">
+                <span class="treeview-caret"><i class="fas fa-angle-right"></i> 2018</span>
+                <ul class="treeview-nested">
+                    <li class="treeview-month">Enero</li>
+                    <li class="treeview-month">Febrero</li>
+                    <li class="treeview-month">Marzo</li>
+                    <li class="treeview-month">Abril</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="main-container">
+    <div class="image-container" id="imageContainer"></div>
+</div>
+<script src="../src/app.js"></script>
+</body>
+</html>

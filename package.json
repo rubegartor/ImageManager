@@ -1,0 +1,21 @@
+{
+  "name": "imagemanager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "node-sass app/assets/sass/app.scss app/assets/css/app.css && electron main.js"
+  },
+  "keywords": [],
+  "author": "rubegartor",
+  "license": "ISC",
+  "devDependencies": {
+    "@fortawesome/fontawesome-free": "^5.12.0",
+    "electron": "^8.0.0"
+  },
+  "dependencies": {
+    "exif": "^0.6.0",
+    "jquery": "^3.5.0",
+    "node-sass": "^4.13.1"
+  }
+}

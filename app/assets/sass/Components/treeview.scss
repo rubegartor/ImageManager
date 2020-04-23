@@ -1,0 +1,48 @@
+.treeview {
+  color: lightgrey;
+  list-style-type: none;
+}
+
+.treeview-month {
+  list-style-type: none;
+  font-size: 1.08em;
+  cursor: pointer;
+
+  &:hover {
+    color: darkgray;
+  }
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.treeview-year {
+  margin-bottom: 14px;
+}
+
+.treeview-nested {
+  margin-top: 0.3em;
+  margin-bottom: 0.3em;
+  margin-left: 1.8em;
+  display: none;
+}
+
+.treeview-caret {
+  cursor: pointer;
+  font-size: 1.1em;
+
+  i {
+    -moz-transition: all 0.2s linear;
+    -webkit-transition: all 0.2s linear;
+    transition: all 0.2s linear;
+    margin-right: 6px;
+  }
+}
+
+.animate-caret {
+  -ms-transform: rotate(90deg);
+  -moz-transform: rotate(90deg);
+  -webkit-transform: rotate(90deg);
+  transform: rotate(90deg);
+}
