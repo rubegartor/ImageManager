@@ -3,50 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <title>ImageManager</title>
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';"/>
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval';"/>
     <link rel="stylesheet" type="text/css" href="../assets/css/app.css">
 </head>
 <body>
-<div class="left-menu">
-    <button type="button" class="btn btn-block btn-orange" data-action="loadFiles">
-        <i class="fas fa-plus"></i> Añadir archivos
-    </button>
-    <button type="button" class="btn btn-block btn-orange" data-action="openConfig">
-        Configruración
-    </button>
-    <hr>
-    <div>
-        <ul class="treeview" id="treeview">
-            <li class="treeview-year">
-                <span class="treeview-caret"><i class="fas fa-angle-right"></i> 2020</span>
-                <ul class="treeview-nested">
-                    <li class="treeview-month">Enero</li>
-                    <li class="treeview-month">Febrero</li>
-                    <li class="treeview-month">Marzo</li>
-                    <li class="treeview-month">Abril</li>
-                </ul>
-            </li>
-            <li class="treeview-year">
-                <span class="treeview-caret"><i class="fas fa-angle-right"></i> 2019</span>
-                <ul class="treeview-nested">
-                    <li class="treeview-month">Enero</li>
-                    <li class="treeview-month">Febrero</li>
-                    <li class="treeview-month">Marzo</li>
-                    <li class="treeview-month">Abril</li>
-                </ul>
-            </li>
-            <li class="treeview-year">
-                <span class="treeview-caret"><i class="fas fa-angle-right"></i> 2018</span>
-                <ul class="treeview-nested">
-                    <li class="treeview-month">Enero</li>
-                    <li class="treeview-month">Febrero</li>
-                    <li class="treeview-month">Marzo</li>
-                    <li class="treeview-month">Abril</li>
-                </ul>
-            </li>
-        </ul>
+<div class="contextmenu" id="contextmenu">
+    <ul class="menu-options">
+        <li class="menu-option">Opcion1</li>
+        <li class="menu-separator"></li>
+        <li class="menu-option">Opcion2</li>
+    </ul>
+</div>
+<div class="modal">
+    <div class="content">
+        <div class="title mb-15">Importación de archivos</div>
+        <progress max="100" value="40"></progress>
     </div>
 </div>
+<div class="modal" id="newDeviceModal">
+    <div class="content w-fit">
+        <div class="close-modal" data-close="modal"><i class="fas fa-times"></i></div>
+        <div class="d-flex pr-15 mb-5">
+            <i class="fab fa-usb fa-3x"></i>
+            <h2 class="usb-title ml-25">Nuevo dispositivo encontrado</h2>
+        </div>
+        <div id="newDeviceModal-usbName" class="text-center mb-15">()</div>
+        <button type="button" class="btn btn-block btn-purple"><i class="fas fa-search mr-10"></i>Escanear</button>
+    </div>
+</div>
+<div class="left-menu">
+    <hr class="mb-20">
+    <div>
+        <div class="reloadTreeview">
+            <span class="title">CARPETAS</span>
+            <i class="fas fa-sync" data-action="reloadTreeView"></i>
+        </div>
+        <ul class="treeview ml-10" id="treeview"></ul>
+    </div>
+    <button type="button" class="btn btn-block btn-blue" data-action="loadFiles">
+        <i class="fas fa-plus"></i> Añadir archivos
+    </button>
+</div>
+<div class="openImage-container" id="openImage"></div>
 <div class="main-container">
     <div class="image-container" id="imageContainer"></div>
 </div>

@@ -38,6 +38,7 @@
 node_modules/
 /app/assets/css
 /archive
+/release-builds
 SHASUMS256.txt
 **/package-lock.json
 compile_commands.json

@@ -1,6 +1,24 @@
-$fa-font-path: "../../../node_modules/@fortawesome/fontawesome-free/webfonts";
+$fa-font-path: "webfonts" !default;
 @import "node_modules/@fortawesome/fontawesome-free/scss/fontawesome";
 @import "node_modules/@fortawesome/fontawesome-free/scss/regular";
+@import "node_modules/@fortawesome/fontawesome-free/scss/brands";
+
+@font-face {
+  font-family: "Font Awesome 5 Free";
+  font-style: normal;
+  font-weight: 400;
+  font-display: auto;
+  src: url(#{$fa-font-path}/webfonts/fa-regular-400.eot);
+  src: url(#{$fa-font-path}/webfonts/fa-regular-400.eot?#iefix) format("embedded-opentype"), url(#{$fa-font-path}/webfonts/fa-regular-400.woff2) format("woff2"), url(#{$fa-font-path}/webfonts/fa-regular-400.woff) format("woff"), url(#{$fa-font-path}/webfonts/fa-regular-400.ttf) format("truetype"), url(#{$fa-font-path}/webfonts/fa-regular-400.svg#fontawesome) format("svg")
+}
+
+.fal, .far {
+  font-family: "Font Awesome 5 Free"
+}
+
+.far {
+  font-weight: 400
+}
 
 @font-face {
   font-family: "Font Awesome 5 Free";
@@ -8,13 +26,10 @@ $fa-font-path: "../../../node_modules/@fortawesome/fontawesome-free/webfonts";
   font-weight: 900;
   font-display: auto;
   src: url(#{$fa-font-path}/fa-solid-900.eot);
-  src: url(#{$fa-font-path}/fa-solid-900.eot?#iefix) format("embedded-opentype"), url(#{$fa-font-path}/fa-solid-900.woff2) format("woff2"), url(#{$fa-font-path}/fa-solid-900.woff) format("woff"), url(#{$fa-font-path}/fa-solid-900.ttf) format("truetype"), url(#{$fa-font-path}/fa-solid-900.svg#fontawesome) format("svg")
-}
-
-.fa, .far, .fas {
-  font-family: "Font Awesome 5 Free"
+  src: url(#{$fa-font-path}/fa-solid-900.eot?#iefix) format("embedded-opentype"), url(#{$fa-font-path}/fa-solid-900.woff2) format("woff2"), url(#{$fa-font-path}/fa-solid-900.woff) format("woff"), url(#{$fa-font-path}/fa-solid-900.ttf) format("truetype"), url(#{$fa-font-path}/fa-solid-900.svg#fontawesome) format("svg");
 }
 
 .fa, .fas {
+  font-family: "Font Awesome 5 Free";
   font-weight: 900
 }

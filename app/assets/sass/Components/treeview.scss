@@ -6,6 +6,7 @@
 .treeview-month {
   list-style-type: none;
   font-size: 1.08em;
+  padding: 5px 0;
   cursor: pointer;
 
   &:hover {
@@ -38,6 +39,10 @@
     transition: all 0.2s linear;
     margin-right: 6px;
   }
+}
+
+.treeview-active {
+  display: block;
 }
 
 .animate-caret {

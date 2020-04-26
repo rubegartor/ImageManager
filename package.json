@@ -4,18 +4,51 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "start": "node-sass app/assets/sass/app.scss app/assets/css/app.css && electron main.js"
+    "start": "./run-script.sh",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
   },
   "keywords": [],
-  "author": "rubegartor",
-  "license": "ISC",
+  "author": "rubegartor <rubegartor@gmail.com>",
+  "license": "MIT",
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.12.0",
-    "electron": "^8.0.0"
+    "electron": "^8.0.0",
+    "electron-builder": "^22.5.1",
+    "electron-rebuild": "^1.10.1"
   },
   "dependencies": {
+    "drivelist": "^8.0.10",
     "exif": "^0.6.0",
     "jquery": "^3.5.0",
-    "node-sass": "^4.13.1"
+    "node-sass": "^4.13.1",
+    "usb-detection": "^4.9.0"
+  },
+  "build": {
+    "appId": "imagemanager",
+    "asar": true,
+    "dmg": {
+      "contents": [
+        {
+          "x": 110,
+          "y": 150
+        },
+        {
+          "x": 240,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    },
+    "win": {
+      "icon": "app/assets/icons/icon.ico"
+    }
   }
 }

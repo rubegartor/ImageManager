@@ -1,6 +1,7 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
+app.allowRendererProcessReuse = false;
 let win;
 
 function createWindow () {
@@ -16,6 +17,7 @@ function createWindow () {
         }
     });
 
+    win.setIcon(path.join(__dirname, 'app/assets/icons/icon.png'));
     win.setMenu(null);
     win.loadFile(path.join(__dirname, 'app/templates/index.html'));
 
@@ -39,5 +41,3 @@ app.on('activate', () => {
         createWindow();
     }
 });
-
-app.allowRendererProcessReuse = false;

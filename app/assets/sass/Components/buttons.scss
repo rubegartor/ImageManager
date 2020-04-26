@@ -1,6 +1,6 @@
 .btn {
   width: auto;
-  padding: 8px 20px;
+  padding: 10px 20px;
   border-radius: 3px;
   border: 0;
   outline: 0;
@@ -15,7 +15,9 @@
   width: 100%;
 }
 
-.btn-orange {
-  color: white;
-  background-color: #cf7500;
+@each $name, $hex in $colors {
+  .btn-#{$name} {
+    background-color: clr($name);
+    color: white;
+  }
 }

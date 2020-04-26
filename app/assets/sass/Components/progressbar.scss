@@ -1,0 +1,14 @@
+progress {
+  height: 10px;
+  border-radius: 30px;
+  width:100%;
+}
+progress[value]::-webkit-progress-bar {
+  background-color: #ededed;
+  border-radius: 40px;
+}
+
+progress[value]::-webkit-progress-value {
+  border-radius: 40px;
+  background-color: orange;
+}
