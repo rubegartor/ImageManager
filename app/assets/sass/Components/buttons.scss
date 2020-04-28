@@ -11,6 +11,10 @@
   }
 }
 
+.btn-bold {
+  font-weight: bold;
+}
+
 .btn-block {
   width: 100%;
 }
@@ -19,5 +23,9 @@
   .btn-#{$name} {
     background-color: clr($name);
     color: white;
+
+    &:active {
+      background-color: darken(clr($name), 10%);
+    }
   }
 }

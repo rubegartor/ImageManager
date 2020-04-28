@@ -10,5 +10,12 @@ progress[value]::-webkit-progress-bar {
 
 progress[value]::-webkit-progress-value {
   border-radius: 40px;
+}
+
+.progress-orange::-webkit-progress-value {
   background-color: orange;
+}
+
+.progress-green::-webkit-progress-value {
+  background-color: $green;
 }

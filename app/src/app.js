@@ -3,12 +3,35 @@ const {dialog, getCurrentWindow} = require('electron').remote;
 const path = require('path');
 const usbDetect = require('usb-detection');
 const drivelist = require('drivelist');
+require('jstree/dist/jstree');
 const globals = require(path.join(__dirname, '../src/commons/globals'));
 const generalProvider = require(path.join(__dirname, '../src/provider/generalProvider'));
 const parserProvider = require(path.join(__dirname, '../src/provider/parserProvider'));
 const contextMenu = require(path.join(__dirname, '../src/commons/contextMenu'));
+const dir2Json = require('dir2Json');
 
 let treeView = $('#treeview');
+
+function loadUSBTreeDir(mountPath) {
+    dir2Json(mountPath).then(function (tree) {
+        $('#jsTreeView').jstree({
+            core: {
+                'themes': {
+                    'name': 'proton',
+                    'responsive': true
+                },
+                'data': [
+                    tree
+                ]
+            },
+            checkbox: {
+                tie_selection: false,
+                three_state: false,
+            },
+            "plugins": ["checkbox"],
+        })
+    });
+}
 
 $(function () {
     contextMenu.createContextMenus();
@@ -20,14 +43,26 @@ $(function () {
                     if (drive.isUSB) {
                         const mountPath = drive.mountpoints[0].path;
                         let modal = $('#newDeviceModal');
+                        let usbTreeViewModal = $('#usbTreeViewModal');
+                        let modalScanUsbBtn = modal.find('[data-action="scanUSBBtn"]');
+
                         $('#newDeviceModal-usbName').text(drive.description);
                         modal.attr('data-pid', device.productId);
+                        modalScanUsbBtn.on('click', function () {
+                            modal.hide();
+                            loadUSBTreeDir(mountPath);
+                            usbTreeViewModal.attr('data-pid', device.productId);
+                            usbTreeViewModal.show();
+                        });
+
                         modal.show();
                         clearInterval(poll);
+                    } else {
+                        console.log(drive);
                     }
                 })
             })
-        }, 2000)
+        }, 2000);
     });
 
     usbDetect.on('remove', function (device) {
@@ -69,7 +104,7 @@ $(window).on('click', function () {
 
 $('body')
     .on('click', '[data-close="modal"]', function () {
-        $('.modal').hide();
+        $('.modal').fadeOut('fast');
     })
     .on('click', '[data-action="loadFiles"]', function () {
         let folderPath = dialog.showOpenDialogSync(getCurrentWindow(), {
@@ -78,13 +113,32 @@ $('body')
 
         if (folderPath) {
             let files = generalProvider.walkSync(folderPath[0]);
+            let progressBar = $('#countingLoadedFilesProgress');
+            let progressModal = $('#countingLoadedFilesModal');
+            let progressVal = $('#countingLoadedFilesVal');
 
             if (files.length >= 1) {
+                progressBar.val(0);
+                progressBar.attr('max', files.length);
+                progressModal.show();
                 for (let path of files) {
-                    parserProvider.parseDateTime(path.dir, path.file);
+                    setTimeout(function () {
+                        parserProvider.parseDateTime(path.dir, path.file);
+                        progressBar.val(progressBar.val() + 1);
+                        if (progressBar.val() === files.length) {
+                            progressBar.removeClass('progress-orange').addClass('progress-green');
+                            $('#countingLoadedFilesContinueBtn').show();
+                        }
+                        progressVal.text('Se han importado ' + progressBar.val() + ' de ' + files.length + ' archivos');
+                    }, files.indexOf(path) * 10); //Arreglo para que funcione el Timeout en el foreach (JS Shit OwO)
                 }
             }
         }
+
+        setTimeout(function () {
+            treeView.html('');
+            renderTreeview();
+        }, 1000);
     })
     .on('click', '[data-action="reloadTreeView"]', function () {
         treeView.html('');
@@ -110,6 +164,9 @@ $('body')
     .on('click', '.openImage-container', function (e) {
         if (e.target !== e.currentTarget) return;
         $('.openImage-container').fadeOut('fast');
+    })
+    .on('click', '#countingLoadedFilesContinueBtn', function () {
+        $('.modal').fadeOut('fast');
     })
 ;
 

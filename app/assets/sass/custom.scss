@@ -24,6 +24,22 @@ hr {
   display: flex;
 }
 
+.d-none {
+  display: none;
+}
+
+.d-block {
+  display: block;
+}
+
+.justify-content-center {
+  justify-content: center;
+}
+
+.justify-content-end {
+  justify-content: flex-end;
+}
+
 .text-center {
   text-align: center;
 }

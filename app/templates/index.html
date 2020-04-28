@@ -3,21 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <title>ImageManager</title>
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval';"/>
+    <meta http-equiv="Content-Security-Policy" content="default-src * data: 'unsafe-eval' 'unsafe-inline' blob:"/>
     <link rel="stylesheet" type="text/css" href="../assets/css/app.css">
 </head>
 <body>
 <div class="contextmenu" id="contextmenu">
-    <ul class="menu-options">
-        <li class="menu-option">Opcion1</li>
-        <li class="menu-separator"></li>
-        <li class="menu-option">Opcion2</li>
-    </ul>
+    <ul class="menu-options"></ul>
 </div>
-<div class="modal">
+<div class="modal" id="countingLoadedFilesModal">
     <div class="content">
         <div class="title mb-15">Importación de archivos</div>
-        <progress max="100" value="40"></progress>
+        <progress max="100" value="0" class="progress-orange" id="countingLoadedFilesProgress"></progress>
+        <div class="d-flex justify-content-center mt-10" id="countingLoadedFilesVal"></div>
+        <div class="d-flex justify-content-center">
+            <button type="button" class="btn btn-green btn-bold d-none mt-15" id="countingLoadedFilesContinueBtn"><i class="fas fa-check mr-5"></i> Continuar</button>
+        </div>
+    </div>
+</div>
+<div class="modal" id="usbTreeViewModal">
+    <div class="content modal-50">
+        <div class="close-modal" data-close="modal"><i class="fas fa-times fa-lg"></i></div>
+        <div id="jsTreeView"></div>
+        <div class="d-flex justify-content-end">
+            <button type="button" class="btn btn-purple btn-bold mt-20"><i class="fab fa-usb mr-5"></i>Procesar archivos</button>
+        </div>
     </div>
 </div>
 <div class="modal" id="newDeviceModal">
@@ -28,7 +37,7 @@
             <h2 class="usb-title ml-25">Nuevo dispositivo encontrado</h2>
         </div>
         <div id="newDeviceModal-usbName" class="text-center mb-15">()</div>
-        <button type="button" class="btn btn-block btn-purple"><i class="fas fa-search mr-10"></i>Escanear</button>
+        <button type="button" class="btn btn-block btn-purple" data-action="scanUSBBtn"><i class="fas fa-search mr-10"></i>Escanear</button>
     </div>
 </div>
 <div class="left-menu">
@@ -41,7 +50,7 @@
         <ul class="treeview ml-10" id="treeview"></ul>
     </div>
     <button type="button" class="btn btn-block btn-blue" data-action="loadFiles">
-        <i class="fas fa-plus"></i> Añadir archivos
+        <i class="fas fa-plus mr-5"></i>Añadir archivos
     </button>
 </div>
 <div class="openImage-container" id="openImage"></div>
