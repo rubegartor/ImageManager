@@ -20,9 +20,7 @@
   },
   "dependencies": {
     "dir2Json": "https://github.com/rubegartor/dir-to-json.git",
-    "directory-tree": "^2.2.4",
     "drivelist": "^8.0.10",
-    "electron-tree-view": "^1.1.0",
     "exif": "^0.6.0",
     "jquery": "^3.5.0",
     "jstree": "^3.3.9",
