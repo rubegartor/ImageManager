@@ -26,6 +26,7 @@
     "exif": "^0.6.0",
     "jquery": "^3.5.0",
     "jstree": "^3.3.9",
+    "jstree-bootstrap-theme": "^1.0.1",
     "node-sass": "^4.13.1",
     "usb-detection": "^4.9.0"
   },
