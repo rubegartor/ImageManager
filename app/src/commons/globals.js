@@ -1,5 +1,11 @@
-module.exports = Object.freeze({
+const phonebrands = require('./data/phone-brands')
+
+module.exports = {
     ARCHIVE_PATH: '/home/ruben/Proyectos/imagemanager/archive',
+    DEVICES_PIDS: [],
+    LOOP_MAX_TRIES: 10,
+    LOOP_BREAK: false,
+    PHONE_BRANDS: phonebrands.PHONE_BRANDS,
     MONTHS: {
         '01': 'Ene',
         '02': 'Feb',
@@ -19,4 +25,4 @@ module.exports = Object.freeze({
     WHATSAPP_TYPE: 'whatsapp',
     IMAGE_TYPE: 'image',
     UNKNOWN_TYPE: 'unknown'
-})
+}

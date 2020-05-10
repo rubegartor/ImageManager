@@ -1,18 +1,23 @@
 const fs = require('fs');
 const path = require('path');
 const globals = require(path.join(__dirname, '../commons/globals'));
+const errors = require(path.join(__dirname, '../commons/error/errors'));
 
 module.exports = {
     /**
      * Obtiene los directorios de un path especificado
      *
      * @param path
-     * @return {string[]}
+     * @return {string[]|Error}
      */
     getDirectories: function (path) {
-        return fs.readdirSync(path).filter(function (file) {
-            return fs.statSync(path + '/' + file).isDirectory();
-        });
+        try {
+            return fs.readdirSync(path).filter(function (file) {
+                return fs.statSync(path + '/' + file).isDirectory();
+            });
+        } catch (e) {
+            return new errors.fsError();
+        }
     },
 
     loadArchive: function (archive = globals.ARCHIVE_PATH) {

@@ -2,26 +2,29 @@ const $ = require('jquery');
 const {dialog, getCurrentWindow} = require('electron').remote;
 const path = require('path');
 const usbDetect = require('usb-detection');
-const drivelist = require('drivelist');
 require('jstree/dist/jstree');
 const globals = require(path.join(__dirname, '../src/commons/globals'));
 const generalProvider = require(path.join(__dirname, '../src/provider/generalProvider'));
 const parserProvider = require(path.join(__dirname, '../src/provider/parserProvider'));
+const usbProvider = require(path.join(__dirname, '../src/provider/usbProvider'));
 const contextMenu = require(path.join(__dirname, '../src/commons/contextMenu'));
+const errors = require(path.join(__dirname, '../src/commons/error/errors'));
 const dir2Json = require('dir2Json');
 
-let treeView = $('#treeview');
+let leftMenuTreeView = $('#treeview');
+let jsTreeViewElement = $('#jsTreeView');
 
 function loadUSBTreeDir(mountPath) {
-    dir2Json(mountPath).then(function (tree) {
-        $('#jsTreeView').jstree({
+    dir2Json(mountPath).then(function (jsonTree) {
+        jsTreeViewElement.jstree("destroy").empty();
+        jsTreeViewElement.jstree({
             core: {
                 'themes': {
                     'name': 'proton',
                     'responsive': true
                 },
                 'data': [
-                    tree
+                    jsonTree
                 ]
             },
             checkbox: {
@@ -29,7 +32,10 @@ function loadUSBTreeDir(mountPath) {
                 three_state: false,
             },
             "plugins": ["checkbox"],
-        })
+        });
+
+        $('.loader-icon').hide();
+        $('.postLoadingContent-icon').show();
     });
 }
 
@@ -37,44 +43,62 @@ $(function () {
     contextMenu.createContextMenus();
     usbDetect.startMonitoring();
     usbDetect.on('add', (device) => {
-        const poll = setInterval(() => {
-            drivelist.list().then((drives) => {
-                drives.forEach((drive) => {
-                    if (drive.isUSB) {
-                        const mountPath = drive.mountpoints[0].path;
-                        let modal = $('#newDeviceModal');
-                        let usbTreeViewModal = $('#usbTreeViewModal');
-                        let modalScanUsbBtn = modal.find('[data-action="scanUSBBtn"]');
+        if (!globals.DEVICES_PIDS.some(dev => dev.pid === device.productId)) {
+            globals.LOOP_BREAK = false;
+            globals.DEVICES_PIDS.push({'pid': device.productId, 'mountpoint': undefined});
 
-                        $('#newDeviceModal-usbName').text(drive.description);
-                        modal.attr('data-pid', device.productId);
-                        modalScanUsbBtn.on('click', function () {
-                            modal.hide();
-                            loadUSBTreeDir(mountPath);
-                            usbTreeViewModal.attr('data-pid', device.productId);
-                            usbTreeViewModal.show();
-                        });
+            let detectedUSB = usbProvider.checkUSBDevice(device);
 
-                        modal.show();
-                        clearInterval(poll);
-                    } else {
-                        console.log(drive);
-                    }
-                })
+            detectedUSB.then((res) => {
+                if (!globals.DEVICES_PIDS.some(dev => dev.mountpoint === res)) {
+                    let deviceIndex = globals.DEVICES_PIDS.findIndex(dev => dev.pid === device.productId);
+                    globals.DEVICES_PIDS[deviceIndex].mountpoint = res;
+
+                    let modal = $('#newDeviceModal');
+                    let usbTreeViewModal = $('#usbTreeViewModal');
+                    let modalScanUsbBtn = modal.find('[data-action="scanUSBBtn"]');
+
+                    let deviceDescription = device.manufacturer ? device.deviceName + ' - ' + device.manufacturer : device.deviceName;
+
+                    $('#newDeviceModal-usbName').text(deviceDescription);
+                    modal.attr('data-pid', device.productId);
+                    modalScanUsbBtn.on('click', function () {
+                        modal.hide();
+                        loadUSBTreeDir(res);
+                        usbTreeViewModal.attr('data-pid', device.productId);
+                        usbTreeViewModal.show();
+
+                        modalScanUsbBtn.off('click');
+                    });
+
+                    modal.show();
+                }
+            }).catch((err) => {
+                if (!(err instanceof errors.fsError)) {
+                    console.error(err);
+                }
             })
-        }, 2000);
+        }
     });
 
     usbDetect.on('remove', function (device) {
+        if (globals.DEVICES_PIDS.some(dev => dev.pid === device.productId)) {
+            globals.DEVICES_PIDS.splice(globals.DEVICES_PIDS.findIndex(dev => dev.pid === device.productId), 1);
+            globals.LOOP_BREAK = true;
+            $('#jsTreeView').empty();
+            $('.loader-icon').show();
+            $('.postLoadingContent-icon').hide();
+        }
+
         $('.modal[data-pid="' + device.productId + '"]').hide();
     });
 
     generalProvider.checkAndMake(globals.ARCHIVE_PATH);
-    renderTreeview();
+    renderLeftMenuTreeview();
 });
 
-//TreeView big shit
-treeView.on('click', 'li', function (e) {
+//leftMenuTreeView big shit
+leftMenuTreeView.on('click', 'li', function (e) {
     $(this).find('ul.treeview-nested').slideToggle('fast');
     $(this).find('.fa-angle-right').toggleClass('animate-caret');
     $(window).trigger('click');
@@ -134,15 +158,10 @@ $('body')
                 }
             }
         }
-
-        setTimeout(function () {
-            treeView.html('');
-            renderTreeview();
-        }, 1000);
     })
     .on('click', '[data-action="reloadTreeView"]', function () {
-        treeView.html('');
-        renderTreeview();
+        leftMenuTreeView.html('');
+        renderLeftMenuTreeview();
     })
     .on('click', '.image', function (e) {
         let thumbnailSrc = $(e.target).attr('src');
@@ -166,6 +185,8 @@ $('body')
         $('.openImage-container').fadeOut('fast');
     })
     .on('click', '#countingLoadedFilesContinueBtn', function () {
+        leftMenuTreeView.html('');
+        renderLeftMenuTreeview();
         $('.modal').fadeOut('fast');
     })
 ;
@@ -173,7 +194,7 @@ $('body')
 /**
  * Función que genera el HTMl del TreeView
  */
-function renderTreeview() {
+function renderLeftMenuTreeview() {
     let treeviewStructure = generalProvider.loadArchive();
 
     for (let year of Object.keys(treeviewStructure).sort()) {
@@ -197,6 +218,6 @@ function renderTreeview() {
             .append(nestedElement)
         ;
 
-        treeView.append(treeviewYear);
+        leftMenuTreeView.append(treeviewYear);
     }
 }

@@ -24,9 +24,14 @@
 <div class="modal" id="usbTreeViewModal">
     <div class="content modal-50">
         <div class="close-modal" data-close="modal"><i class="fas fa-times fa-lg"></i></div>
-        <div id="jsTreeView"></div>
-        <div class="d-flex justify-content-end">
-            <button type="button" class="btn btn-purple btn-bold mt-20"><i class="fab fa-usb mr-5"></i>Procesar archivos</button>
+        <div class="d-flex justify-content-center loader-icon" id="usbTreeViewModalLoadingIcon">
+            <i class="fas fa-spinner fa-pulse fa-3x text-gray"></i>
+        </div>
+        <div class="d-none postLoadingContent-icon">
+            <div id="jsTreeView"></div>
+            <div class="d-flex justify-content-end">
+                <button type="button" class="btn btn-purple btn-bold mt-20"><i class="fab fa-usb mr-5"></i>Procesar archivos</button>
+            </div>
         </div>
     </div>
 </div>
