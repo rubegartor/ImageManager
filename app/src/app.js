@@ -43,6 +43,7 @@ $(function () {
     contextMenu.createContextMenus();
     usbDetect.startMonitoring();
     usbDetect.on('add', (device) => {
+        console.log(device);
         if (!globals.DEVICES_PIDS.some(dev => dev.pid === device.productId)) {
             globals.LOOP_BREAK = false;
             globals.DEVICES_PIDS.push({'pid': device.productId, 'mountpoint': undefined});

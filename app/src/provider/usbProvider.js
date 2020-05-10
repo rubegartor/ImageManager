@@ -28,6 +28,9 @@ module.exports = {
                                     retries++;
 
                                     let dir = generalProvider.getDirectories(linuxMobileMount);
+                                    //Se elige el directorio que pertenezca directamente a los datos del telefono, por ejemplo los iPhone crean 2 directorios diferentes
+                                    let dirIndex = dir.findIndex((element) => element.includes(device.deviceName));
+
                                     if (dir instanceof errors.fsError) {
                                         if (loopInterval) {
                                             globals.LOOP_BREAK = false;
@@ -35,10 +38,10 @@ module.exports = {
                                         }
                                         reject(dir);
                                     } else {
-                                        if (dir.length > 0 && generalProvider.getDirectories(path.join(linuxMobileMount, dir[0])).length > 0) {
+                                        if (dir.length > 0 && generalProvider.getDirectories(path.join(linuxMobileMount, dir[dirIndex])).length > 0) {
                                             clearInterval(loopInterval);
                                             globals.LOOP_BREAK = false;
-                                            resolve(path.join(linuxMobileMount, dir[0]));
+                                            resolve(path.join(linuxMobileMount, dir[dirIndex]));
                                         }
 
                                         if (retries === globals.LOOP_MAX_TRIES || globals.LOOP_BREAK) {
