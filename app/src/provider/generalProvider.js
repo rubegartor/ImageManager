@@ -20,7 +20,7 @@ module.exports = {
         }
     },
 
-    loadArchive: function (archive = globals.ARCHIVE_PATH) {
+    loadArchive: function (archive = globals.CONFIG.get('archive')) {
         let structure = {};
 
         for (let year of this.getDirectories(archive)) {

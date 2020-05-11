@@ -1,31 +1,44 @@
-$left-menu: #222831;
+$left-menu: #252525;
+$dark-text: #252525;
+$dark: #A4A4A4;
+$top: #F4F4F4;
+$primary: #F1194B;
 $orange: #cf7500;
-$blue: #30475e;
 $brown: #c1a57b;
-$gray: #63707e;
+$gray: #CFCFCF;
+$light-gray: #F0F0F0;
 $light-orange: #f0a500;
 $red: #cd3f3e;
 $green: #27aa80;
-$purple: #574f7d;
 
 $lighten: 5;
 $darken: 25;
 
 $colors: (
+        primary: (
+                base: $primary,
+                light: lighten($primary, $lighten),
+                dark: darken($primary, $darken),
+        ),
+        dark: (
+                base: $dark,
+                light: lighten($dark, $lighten),
+                darrk: darken($dark, $darken),
+        ),
         orange: (
                 base: $orange,
                 light: lighten($orange, $lighten),
                 dark: darken($orange, $darken),
         ),
-        blue: (
-                base: $blue,
-                light: lighten($blue, $lighten),
-                dark: darken($blue, $darken),
-        ),
         brown: (
                 base: $brown,
                 light: lighten($brown, $lighten),
                 dark: darken($brown, $darken),
+        ),
+        lightgray: (
+                base: $light-gray,
+                light: lighten($light-gray, $lighten),
+                dark: darken($light-gray, $darken)
         ),
         gray: (
                 base: $gray,
@@ -46,11 +59,6 @@ $colors: (
                 base: $green,
                 light: lighten($green, $lighten),
                 dark: darken($green, $darken),
-        ),
-        purple: (
-                base: $purple,
-                light: lighten($purple, $lighten),
-                dark: darken($purple, $darken),
         )
 );
 

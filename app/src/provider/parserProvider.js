@@ -27,7 +27,7 @@ module.exports = {
 
                             let formatedDateTime = date.day + '-' + date.month + '-' + date.year + '.' + date.time;
                             let finalPath = generalProvider.checkAndMake(path.join(
-                                globals.ARCHIVE_PATH,
+                                globals.CONFIG.get('archive'),
                                 date.year.toString(),
                                 date.month.toString() + ' ' + globals.MONTHS[date.month]));
 
@@ -42,7 +42,7 @@ module.exports = {
                         let date = this._getWhatsAppImageDate(file);
 
                         let formatedDate = date.day + '-' + date.month + '-' + date.year;
-                        let finalPath = generalProvider.checkAndMake(path.join(globals.ARCHIVE_PATH,
+                        let finalPath = generalProvider.checkAndMake(path.join(globals.CONFIG.get('archive'),
                             date.year.toString(),
                             date.month.toString() + ' ' + globals.MONTHS[date.month]));
 

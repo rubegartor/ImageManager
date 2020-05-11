@@ -1,7 +1,8 @@
-const phonebrands = require('./data/phone-brands')
+const path = require('path');
+const phonebrands = require(path.join(__dirname, 'data/phone-brands'))
 
 module.exports = {
-    ARCHIVE_PATH: '/home/ruben/Proyectos/imagemanager/archive',
+    CONFIG: undefined,
     DEVICES_PIDS: [],
     LOOP_MAX_TRIES: 10,
     LOOP_BREAK: false,

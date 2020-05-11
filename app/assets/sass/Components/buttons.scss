@@ -1,7 +1,9 @@
 .btn {
   width: auto;
+  max-height: 35px;
   padding: 10px 20px;
   border-radius: 3px;
+  font-weight: 500;
   border: 0;
   outline: 0;
   cursor: pointer;
@@ -17,6 +19,17 @@
 
 .btn-block {
   width: 100%;
+}
+
+.btn-round {
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  padding: 0;
+
+  i {
+    padding-top: 2px;
+  }
 }
 
 @each $name, $hex in $colors {

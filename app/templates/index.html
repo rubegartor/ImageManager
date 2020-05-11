@@ -11,13 +11,17 @@
 <div class="contextmenu" id="contextmenu">
     <ul class="menu-options"></ul>
 </div>
+
+<!-- START MODALS -->
 <div class="modal" id="countingLoadedFilesModal">
     <div class="content">
         <div class="title mb-15">Importación de archivos</div>
         <progress max="100" value="0" class="progress-orange" id="countingLoadedFilesProgress"></progress>
         <div class="d-flex justify-content-center mt-10" id="countingLoadedFilesVal"></div>
         <div class="d-flex justify-content-center">
-            <button type="button" class="btn btn-green btn-bold d-none mt-15" id="countingLoadedFilesContinueBtn"><i class="fas fa-check mr-5"></i> Continuar</button>
+            <button type="button" class="btn btn-green btn-bold d-none mt-15" id="countingLoadedFilesContinueBtn"><i
+                    class="fas fa-check mr-5"></i> Continuar
+            </button>
         </div>
     </div>
 </div>
@@ -30,7 +34,9 @@
         <div class="d-none postLoadingContent-icon">
             <div id="jsTreeView"></div>
             <div class="d-flex justify-content-end">
-                <button type="button" class="btn btn-purple btn-bold mt-20"><i class="fab fa-usb mr-5"></i>Procesar archivos</button>
+                <button type="button" class="btn btn-primary btn-bold mt-20"><i class="fab fa-usb mr-5"></i>Procesar
+                    archivos
+                </button>
             </div>
         </div>
     </div>
@@ -43,11 +49,32 @@
             <h2 class="usb-title ml-25">Nuevo dispositivo encontrado</h2>
         </div>
         <div id="newDeviceModal-usbName" class="text-center mb-15">()</div>
-        <button type="button" class="btn btn-block btn-purple" data-action="scanUSBBtn"><i class="fas fa-search mr-10"></i>Escanear</button>
+        <button type="button" class="btn btn-block btn-primary" data-action="scanUSBBtn"><i
+                class="fas fa-search mr-10"></i>Escanear
+        </button>
     </div>
 </div>
+<!-- END MODALS -->
+
+<!-- CONFIG PANEL -->
+<div class="configPanel d-none" id="configPanel">
+    <h1 class="mb-15">Configuración</h1>
+    <div class="panel mb-15">
+        <div class="d-flex">
+            <span class="text-nowrap vertical-align mr-10">Images save path: </span>
+            <input type="text" class="form-control" id="archivePathInput"/>
+        </div>
+    </div>
+    <div class="d-flex justify-content-end">
+        <button type="button" class="btn btn-primary" data-action="saveConfiguration">
+            <i class="fas fa-save mr-5"></i>Guardar
+        </button>
+    </div>
+</div>
+<!-- END CONFIG PANEL -->
+
 <div class="left-menu">
-    <hr class="mb-20">
+    <hr class="hr-light mb-20">
     <div>
         <div class="reloadTreeview">
             <span class="title">CARPETAS</span>
@@ -55,13 +82,37 @@
         </div>
         <ul class="treeview ml-10" id="treeview"></ul>
     </div>
-    <button type="button" class="btn btn-block btn-blue" data-action="loadFiles">
-        <i class="fas fa-plus mr-5"></i>Añadir archivos
-    </button>
+</div>
+<div class="right-sidebar d-none" id="rightSidebar">
+    <hr class="hr-dark mt-25">
+    <div class="title">
+        Opciones
+    </div>
+    <div class="close">
+        <i class="fas fa-times" data-action="closeRightSidebar"></i>
+    </div>
+    <div class="container justify-content-center">
+        <a class="item bg-primary tooltip" data-action="loadFiles">
+            <span class="tooltiptext">Añadir Imágenes</span>
+            <i class="fas fa-plus"></i>
+        </a>
+        <div class="item bg-lightgray tooltip">
+            <span class="tooltiptext">Configuración</span>
+            <i class="fas fa-cog text-dark"></i>
+        </div>
+    </div>
 </div>
 <div class="openImage-container" id="openImage"></div>
 <div class="main-container">
-    <div class="image-container" id="imageContainer"></div>
+    <div class="top-container d-flex justify-content-between">
+        <div class="title vertical-align ml-30" id="topTitle"></div>
+        <button type="button" class="btn btn-primary btn-round vertical-align mr-15" data-action="openRightSidebar">
+            <i class="fas fa-ellipsis-v"></i>
+        </button>
+    </div>
+    <div class="full-container">
+        <div class="image-container" id="imageContainer"></div>
+    </div>
 </div>
 <script src="../src/app.js"></script>
 </body>

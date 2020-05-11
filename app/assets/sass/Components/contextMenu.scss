@@ -21,7 +21,7 @@
   width: 92%;
   height: 1px;
   margin: 0 4%;
-  background-color: $blue;
+  background-color: darken($gray, 60);
 }
 
 .contextmenu .menu-options .menu-option:hover {

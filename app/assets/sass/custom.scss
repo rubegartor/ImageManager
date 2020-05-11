@@ -7,17 +7,25 @@
 }
 
 body {
-  font-family: Helvetica, serif;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 400 !important;
   font-size: 0.9rem;
   display: flex;
 }
 
 hr {
-  background-color: rgba(255, 255, 255, 0.1);
   border: 0;
   width: 100%;
   height: 1px;
   margin: 10px 0;
+}
+
+.hr-light {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.hr-dark {
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 .d-flex {
@@ -40,6 +48,14 @@ hr {
   justify-content: flex-end;
 }
 
+.justify-content-between {
+  justify-content: space-between;
+}
+
+.vertical-align {
+  align-self: center;
+}
+
 .text-center {
   text-align: center;
 }
@@ -48,6 +64,9 @@ hr {
   width: fit-content !important;
 }
 
+.text-nowrap {
+  white-space: nowrap;
+}
 
 .left-menu {
   background-color: $left-menu;
@@ -59,11 +78,98 @@ hr {
   overflow-y: auto;
 }
 
+.right-sidebar {
+  background-color: white;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 300px;
+  height: 100%;
+  box-shadow: -3px 0px 10px 0px rgba(0, 0, 0, 0.20);
+  z-index: 100;
+
+  .title {
+    background-color: white;
+    position: absolute;
+    top: 15px;
+    padding-left: 20px;
+    width: 100px;
+    height: 22px;
+    font-size: 1.05em;
+    font-weight: bolder;
+    color: $dark;
+  }
+
+  .close {
+    background-color: white;
+    width: 38px;
+    height: 30px;
+    margin-right: -10px;
+    padding-left: 10px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: $gray;
+    font-size: 1.5em;
+    cursor: pointer;
+
+    &:hover {
+      color: $primary;
+    }
+
+    &:active {
+      color: darken($primary, 10);
+    }
+  }
+
+  .container {
+    display: flex;
+    justify-content: center;
+    padding-top: 50px;
+
+    .item {
+      display: flex;
+      width: 65px;
+      height: 65px;
+      border-radius: 8px;
+      align-items: center;
+      justify-content: center;
+      margin: 10px;
+      color: white;
+      font-size: 1.3em;
+      cursor: pointer;
+
+      &:hover {
+        opacity: 0.9;
+      }
+
+      &:active {
+        opacity: 0.8;
+      }
+    }
+  }
+}
+
 .main-container {
-  background-color: #ececec;
+  background-color: white;
   width: 100%;
   height: 100vh;
-  padding: 15px;
+}
+
+.top-container {
+  background-color: $top;
+  width: 100%;
+  height: 60px;
+
+  .title {
+    color: $dark-text;
+    font-size: 1.5em;
+    font-weight: 700;
+  }
+}
+
+.full-container {
+  height: calc(100% - 60px);
   overflow-y: scroll;
 }
 
@@ -71,6 +177,7 @@ hr {
   display: flex;
   flex-flow: wrap;
   justify-content: center;
+  padding-top: 10px;
 }
 
 .image {
@@ -80,6 +187,7 @@ hr {
   border-radius: 2px;
   margin: 5px 5px;
   cursor: pointer;
+  box-shadow: 0 0 4px 0 rgba(0, 0, 0, .05), 0 3px 4px 0 rgba(0, 0, 0, .05), 0 2px 5px 0 rgba(0, 0, 0, .05);
 
   &:hover {
     opacity: 0.9;
@@ -143,4 +251,48 @@ hr {
     margin: auto;
     border-radius: 3px;
   }
+}
+
+.configPanel {
+  background-color: $light-gray;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  padding: 15px;
+  z-index: 10;
+
+  .panel {
+    background-color: white;
+    width: 100%;
+    border-radius: 3px;
+    padding: 15px;
+    box-shadow: 0 0 4px 0 rgba(0, 0, 0, .05), 0 3px 4px 0 rgba(0, 0, 0, .05), 0 1px 5px 0 rgba(0, 0, 0, .05);
+  }
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 170px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  font-size: 0.8em;
+  margin-top: 55px;
+  padding-left: 10px;
+  padding-right: 10px;
 }
