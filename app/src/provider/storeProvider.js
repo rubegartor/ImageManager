@@ -41,16 +41,13 @@ class Store {
 
                 let jsonData = JSON.parse(data);
 
-                this.data = jsonData;
+                for (const key in jsonData) {
+                    if (jsonData.hasOwnProperty(key)) {
+                        this.set(key, jsonData[key]);
+                    }
+                }
 
                 resolve(true);
-
-                /*for (const key in jsonData) {
-                    this.set(key, jsonData[key]);
-                    if (jsonData.hasOwnProperty(key)) {
-
-                    }
-                }*/
             });
         });
     }
