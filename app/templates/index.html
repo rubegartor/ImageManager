@@ -56,23 +56,6 @@
 </div>
 <!-- END MODALS -->
 
-<!-- CONFIG PANEL -->
-<div class="configPanel d-none" id="configPanel">
-    <h1 class="mb-15">Configuración</h1>
-    <div class="panel mb-15">
-        <div class="d-flex">
-            <span class="text-nowrap vertical-align mr-10">Images save path: </span>
-            <input type="text" class="form-control" id="archivePathInput"/>
-        </div>
-    </div>
-    <div class="d-flex justify-content-end">
-        <button type="button" class="btn btn-primary" data-action="saveConfiguration">
-            <i class="fas fa-save mr-5"></i>Guardar
-        </button>
-    </div>
-</div>
-<!-- END CONFIG PANEL -->
-
 <div class="left-menu">
     <hr class="hr-light mb-20">
     <div>
@@ -84,21 +67,58 @@
     </div>
 </div>
 <div class="right-sidebar d-none" id="rightSidebar">
-    <hr class="hr-dark mt-25">
-    <div class="title">
-        Opciones
-    </div>
-    <div class="close">
-        <i class="fas fa-times" data-action="closeRightSidebar"></i>
-    </div>
-    <div class="container justify-content-center">
-        <a class="item bg-primary tooltip" data-action="loadFiles">
-            <span class="tooltiptext">Añadir Imágenes</span>
-            <i class="fas fa-plus"></i>
-        </a>
-        <div class="item bg-lightgray tooltip">
-            <span class="tooltiptext">Configuración</span>
-            <i class="fas fa-cog text-dark"></i>
+    <div>
+        <hr class="hr-dark mt-25">
+        <div class="title">
+            Opciones
+        </div>
+        <div class="close" data-action="closeRightSidebar">
+            <i class="fas fa-times"></i>
+        </div>
+        <div class="container justify-content-center">
+            <a class="item bg-primary tooltip" data-action="loadFiles">
+                <span class="tooltiptext">Añadir Imágenes</span>
+                <i class="fas fa-plus"></i>
+            </a>
+            <a class="item bg-lightgray tooltip" data-action="showConfig">
+                <span class="tooltiptext">Configuración</span>
+                <i class="fas fa-cog text-dark"></i>
+                <i class="fas fa-lg fa-exclamation-circle text-light-orange alertIcon" id="showConfigBtnAlertIcon"></i>
+            </a>
+        </div>
+        <div class="mt-30"></div>
+        <div class="ml-20 mr-20 d-none" id="rightSidebarConfig">
+            <hr class="hr-dark mb-25">
+            <div class="d-flex align-items-center">
+                <span class="text-dark mr-20">Seleccionar los nodos hijos al seleccionar el nodo padre</span>
+                <label class="switch-wrap config-switch">
+                    <input type="checkbox" id="selectChildrenNodesConfig" />
+                    <div class="switch"></div>
+                </label>
+            </div>
+            <hr class="hr-dark mt-25 mb-25">
+            <div class="d-flex align-items-center">
+                <span class="text-dark mr-20">Eliminar imágenes de la caché <small>(Recomendado)</small></span>
+                <label class="switch-wrap config-switch">
+                    <input type="checkbox" id="optimizeImageMemoryConfig" />
+                    <div class="switch"></div>
+                </label>
+            </div>
+            <hr class="hr-dark mt-25 mb-25">
+            <div>
+                <span class="text-dark">Ruta del archivo de imágenes:</span>
+                <div class="d-flex mt-5 align-items-center">
+                    <i class="fas fa-lg fa-exclamation-circle text-light-orange d-none mr-10" id="archivePathConfigAlertIcon"></i>
+                    <input type="text" class="form-control outline-red mr-10" id="archivePathConfig" />
+                    <button type="button" class="btn btn-bold btn-primary" id="archivePathConfigBtn">...</button>
+                </div>
+            </div>
+        </div>
+        <div class="ml-20 mr-20 mb-20">
+            <hr class="hr-dark mt-25">
+            <div class="d-flex justify-content-end ">
+                <span class="text-gray text-nowrap" id="version"></span>
+            </div>
         </div>
     </div>
 </div>
@@ -111,9 +131,13 @@
         </button>
     </div>
     <div class="full-container">
-        <div class="image-container" id="imageContainer"></div>
+        <div class="d-flex justify-content-center noimages" id="noimages">
+            <span class="text-dark">No hay imágenes para mostrar</span>
+        </div>
+        <div class="image-container vertical-align" id="imageContainer"></div>
     </div>
 </div>
+<div class="alertPanel" id="alertPanel"></div>
 <script src="../src/app.js"></script>
 </body>
 </html>

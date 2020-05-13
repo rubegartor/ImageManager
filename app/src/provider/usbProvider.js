@@ -29,7 +29,11 @@ module.exports = {
 
                                     let dir = generalProvider.getDirectories(linuxMobileMount);
                                     //Se elige el directorio que pertenezca directamente a los datos del telefono, por ejemplo los iPhone crean 2 directorios diferentes
-                                    let dirIndex = dir.findIndex((element) => element.includes(device.deviceName));
+                                    let dirIndex = dir.findIndex((element) => element.includes(device.deviceName)); //Por defecto para dispositivos Android
+
+                                    if (device.manufacturer === globals.PHONE_BRANDS.APPLE_BRAND) {
+                                        dirIndex = dir.findIndex((element) => element.includes('gphoto2:host='));
+                                    }
 
                                     if (dir instanceof errors.fsError) {
                                         if (loopInterval) {

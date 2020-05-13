@@ -1,4 +1,5 @@
 const {getCurrentWindow} = require('electron').remote;
+const contextMenuFunctions = require(path.join(__dirname, 'contextMenuFunctions'));
 
 module.exports = {
     addContextMenu: function (element, subElement, options, funcs) {
@@ -55,19 +56,23 @@ module.exports = {
     },
 
     createContextMenus: function () {
-        let messageContextMenuOptions = [
-            $('<li>').addClass('menu-option').attr('id', 'contextmenu-copyMsgBtn').text('Copiar'),
-            $('<li>').addClass('menu-separator'),
-            $('<li>').addClass('menu-option').attr('id', 'contextmenu-editMsgBtn').text('Editar mensaje'),
-            $('<li>').addClass('menu-option').attr('id', 'contextmenu-removeMsgBtn').text('Eliminar mensaje')
+        let bodyElement = $('body');
+
+        let inputContextMenuOptions = [
+            $('<li>').addClass('menu-option').attr('id', 'contextmenu-copyTextBtn').text('Copiar'),
+            $('<li>').addClass('menu-option').attr('id', 'contextmenu-pasteTextBtn').text('Pegar')
         ]
 
-        let messageContextMenuFuncs = [this.alerta, null, this.alerta, this.alerta]
+        let messageContextMenuOptions = [
+            $('<li>').addClass('menu-option').attr('id', 'contextmenu-imageInfoBtn').text('Información'),
+            $('<li>').addClass('menu-separator'),
+            $('<li>').addClass('menu-option').attr('id', 'contextmenu-imageDeleteBtn').text('Eliminar')
+        ]
 
-        this.addContextMenu($('body'), '.main-container', messageContextMenuOptions, messageContextMenuFuncs)
-    },
+        let messageContextMenuFuncs = [null, null, null]
+        let inputContextMenuFuncs = [contextMenuFunctions.copyText, contextMenuFunctions.pasteText]
 
-    alerta: function () {
-        alert(1);
+        this.addContextMenu(bodyElement, '.main-container', messageContextMenuOptions, messageContextMenuFuncs)
+        this.addContextMenu(bodyElement, '.form-control', inputContextMenuOptions, inputContextMenuFuncs)
     }
 };

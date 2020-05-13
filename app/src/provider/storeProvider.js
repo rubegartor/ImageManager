@@ -11,8 +11,11 @@ class Store {
         if (data) {
             this.data = data;
         } else {
+            //Default config data
             this.data = {
-                'archive': undefined
+                'archive': undefined,
+                'selectChildrenNodes': false,
+                'optimizeImageMemory': true
             };
         }
     }
@@ -28,16 +31,16 @@ class Store {
     parseData() {
         return new Promise((resolve, reject) => {
             let configPath = this.getConfigPath();
-            generalProvider.checkAndMake(configPath, false);
+            generalProvider.checkAndMake(configPath, true);
 
             if (!fs.existsSync(path.join(configPath, CONFIG_FILE))) {
                 fs.writeFile(path.join(configPath, CONFIG_FILE), JSON.stringify(this.data), function (err) {
-                    if (err) throw new errors.criticalError('No se ha podido crear el archivo de configuración.');
+                    if (err) reject(errors.criticalError('No se ha podido crear el archivo de configuración.'));
                 });
             }
 
             fs.readFile(path.join(configPath, CONFIG_FILE), 'utf8', (err, data) => {
-                if (err) throw new errors.criticalError('No se ha podido leer el archivo de configuración.');
+                if (err) reject(errors.criticalError('No se ha podido leer el archivo de configuración.'));
 
                 let jsonData = JSON.parse(data);
 
@@ -54,14 +57,14 @@ class Store {
 
     getConfigPath() {
         let configPath = undefined;
-        let username = os.userInfo().username;
+        let homedir = os.homedir();
 
         switch (os.platform()) {
             case "linux":
-                configPath = '/home/' + username + '/.config/imagemanager';
+                configPath = homedir + '/.config/imagemanager/';
                 break;
             case "win32":
-                configPath = 'C:\\Users\\' + username + '\\AppData\\Local\\imagemanager'
+                configPath = homedir + '\\AppData\\Local\\imagemanager'
                 break;
         }
 

@@ -1,3 +1,4 @@
+//TODO: Implementar la clase Image sobre el app.js
 class Image {
     constructor() {
         this._filename = '';

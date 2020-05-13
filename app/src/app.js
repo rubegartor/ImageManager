@@ -1,9 +1,10 @@
+require('jstree/dist/jstree');
 const $ = require('jquery');
 const {dialog, getCurrentWindow} = require('electron').remote;
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const usbDetect = require('usb-detection');
-require('jstree/dist/jstree');
 const Store = require(path.join(__dirname, '../src/provider/storeProvider'));
 const globals = require(path.join(__dirname, '../src/commons/globals'));
 const generalProvider = require(path.join(__dirname, '../src/provider/generalProvider'));
@@ -11,32 +12,48 @@ const parserProvider = require(path.join(__dirname, '../src/provider/parserProvi
 const usbProvider = require(path.join(__dirname, '../src/provider/usbProvider'));
 const contextMenu = require(path.join(__dirname, '../src/commons/contextMenu'));
 const errors = require(path.join(__dirname, '../src/commons/error/errors'));
+const Alert = require(path.join(__dirname, '../src/model/alert'));
 const dir2Json = require('dir2Json');
-const os = require('os');
 
 let leftMenuTreeView = $('#treeview');
 let jsTreeViewElement = $('#jsTreeView');
-
 
 //LOAD CONFIGURATION DATA
 globals.CONFIG = new Store();
 globals.CONFIG.parseData().then(function () {
     loadMain();
+}).catch(function (err) {
+
 });
 
 function loadMain() {
     if (globals.CONFIG.get('archive') !== undefined) {
+        $('#showConfigBtnAlertIcon').hide();
+        $('#archivePathConfig').val(globals.CONFIG.get('archive'));
         renderLeftMenuTreeview();
     } else {
-        renderConfigPanel();
+        new Alert('Configuración', 'Se necesita configurar la "Ruta del archivo de imágenes"', Alert.BLUE_ALERT, 10000).spawn();
+        $('#archivePathConfigAlertIcon').show();
+    }
+
+    if (globals.CONFIG.get('optimizeImageMemory')) {
+        let element = $('#optimizeImageMemoryConfig');
+        element.next().trigger('click');
+    }
+
+    if (globals.CONFIG.get('selectChildrenNodes')) {
+        let element = $('#selectChildrenNodesConfig');
+        element.next().trigger('click');
     }
 
     console.log('=== DEBUG INFO ===');
     console.log('OS Platform: ' + os.platform());
     console.log('User UID: ' + os.userInfo().uid);
+    console.log('User homedir: ' + os.homedir())
     console.log('=== END DEBUG INFO ===');
 
     $(function () {
+        setVersion();
         contextMenu.createContextMenus();
         usbDetect.startMonitoring();
 
@@ -75,7 +92,7 @@ function loadMain() {
                     }
                 }).catch((err) => {
                     if (!(err instanceof errors.fsError)) {
-                        console.error(err);
+                        new Alert('Error', err.message, Alert.RED_ALERT).spawn();
                     }
                 })
             }
@@ -101,24 +118,35 @@ function loadMain() {
         $(window).trigger('click');
         e.stopPropagation();
     }).on('click', '.treeview-month', function () {
+        $('.treeview-month').removeClass('treeview-selected');
+        $('.treeview-nested').prev().removeClass('treeview-selected');
+        $(this).addClass('treeview-selected');
+        $(this).parent().prev().addClass('treeview-selected');
         let year = $(this).data('year').toString();
         let month = $(this).data('month').toString();
 
         let files = generalProvider.walkSync(path.join(globals.CONFIG.get('archive'), year, month));
         let imageContainer = $('#imageContainer');
 
-        imageContainer.html('');
-
-        for (let image of files) {
-            let imageElement = $('<img>')
-                .addClass('image')
-                .attr('src', path.join(image.dir, image.file))
-            ;
-
-            imageContainer.append(imageElement);
+        //Se eliminan las imagenes para liberar el espacio que ocupaban en la memoria.
+        for (let imageObject of imageContainer.children()) {
+            imageObject.remove();
         }
 
-        $('#topTitle').text(year + ' - ' + generalProvider.monthToMonthName(month));
+        if (files.length > 0) {
+            for (let image of files) {
+                let imageElement = $('<img>')
+                    .addClass('image')
+                    .attr('src', path.join(image.dir, image.file))
+                ;
+
+                imageContainer.append(imageElement);
+            }
+            $('#topTitle').text(year + ' - ' + generalProvider.monthToMonthName(month));
+            $('#noimages').hide();
+        } else {
+            $('#noimages').show();
+        }
     });
 
     $(window)
@@ -137,38 +165,41 @@ function loadMain() {
             $('.modal').fadeOut('fast');
         })
         .on('click', '[data-action="loadFiles"]', function () {
-            $(window).trigger('modalShow');
-            let folderPath = dialog.showOpenDialogSync(getCurrentWindow(), {
-                properties: ['openDirectory']
-            });
+            if (globals.CONFIG.get('archive') !== undefined) {
+                $(window).trigger('modalShow');
+                let folderPath = dialog.showOpenDialogSync(getCurrentWindow(), {
+                    properties: ['openDirectory']
+                });
 
-            if (folderPath) {
-                let files = generalProvider.walkSync(folderPath[0]);
-                let progressBar = $('#countingLoadedFilesProgress');
-                let progressModal = $('#countingLoadedFilesModal');
-                let progressVal = $('#countingLoadedFilesVal');
+                if (folderPath && folderPath[0] !== globals.CONFIG.get('archive')) {
+                    let files = generalProvider.walkSync(folderPath[0]);
+                    let progressBar = $('#countingLoadedFilesProgress');
+                    let progressModal = $('#countingLoadedFilesModal');
+                    let progressVal = $('#countingLoadedFilesVal');
 
-                if (files.length >= 1) {
-                    progressBar.val(0);
-                    progressBar.attr('max', files.length);
-                    progressModal.show();
-                    for (let path of files) {
-                        setTimeout(function () {
-                            parserProvider.parseDateTime(path.dir, path.file);
-                            progressBar.val(progressBar.val() + 1);
-                            if (progressBar.val() === files.length) {
-                                progressBar.removeClass('progress-orange').addClass('progress-green');
-                                $('#countingLoadedFilesContinueBtn').show();
-                            }
-                            progressVal.text('Se han importado ' + progressBar.val() + ' de ' + files.length + ' archivos');
-                        }, files.indexOf(path) * 10); //Arreglo para que funcione el Timeout en el foreach (JS Shit OwO)
+                    if (files.length >= 1) {
+                        progressBar.val(0);
+                        progressBar.attr('max', files.length);
+                        progressModal.show();
+                        for (let path of files) {
+                            setTimeout(function () {
+                                parserProvider.parseDateTime(path.dir, path.file);
+                                progressBar.val(progressBar.val() + 1);
+                                if (progressBar.val() === files.length) {
+                                    progressBar.removeClass('progress-orange').addClass('progress-green');
+                                    $('#countingLoadedFilesContinueBtn').show();
+                                }
+                                progressVal.text('Se han importado ' + progressBar.val() + ' de ' + files.length + ' archivos');
+                            }, files.indexOf(path) * 10); //Arreglo para que funcione el Timeout en el foreach (JS Shit OwO)
+                        }
                     }
                 }
             }
         })
         .on('click', '[data-action="reloadTreeView"]', function () {
-            leftMenuTreeView.html('');
-            renderLeftMenuTreeview();
+            if(globals.CONFIG.get('archieve') !== undefined) {
+                renderLeftMenuTreeview();
+            }
         })
         .on('click', '.image', function (e) {
             $(window).trigger('imageOpen');
@@ -194,30 +225,49 @@ function loadMain() {
         })
         .on('click', '#countingLoadedFilesContinueBtn', function () {
             $(window).trigger('modalShow');
-            leftMenuTreeView.html('');
             renderLeftMenuTreeview();
             $('.modal').fadeOut('fast');
         })
-        .on('click', '[data-action="saveConfiguration"]', function () {
-            let archivePathInputElement = $('#archivePathInput');
-
-            if (fs.existsSync(archivePathInputElement.val().trim())) {
-                globals.CONFIG.set('archive', archivePathInputElement.val().trim());
-                globals.CONFIG.updateConfig();
-
-                renderLeftMenuTreeview();
-
-                $('#configPanel').hide();
-            } else {
-                throw new errors.validationError('La ruta especificada para "archivePath" no es válida.');
-            }
-        })
         .on('click', '[data-action="openRightSidebar"]', function () {
+            $('#rightSidebar > div').show();
             $('#rightSidebar').animate({width: 'toggle'}, 350);
-
         })
         .on('click', '[data-action="closeRightSidebar"]', function () {
-            $('#rightSidebar').animate({width: 'toggle'}, 350);
+            $('#rightSidebar > div').hide();
+            $('#rightSidebar').animate({width: 'hide'}, 350);
+        })
+        .on('click', '[data-action="showConfig"]', function () {
+            $('#rightSidebarConfig').toggle('fast');
+        })
+        .on('change', '#optimizeImageMemoryConfig', function () {
+            $(this).is(':checked') ? globals.CONFIG.set('optimizeImageMemory', true) : globals.CONFIG.set('optimizeImageMemory', false);
+            globals.CONFIG.updateConfig();
+        })
+        .on('change', '#selectChildrenNodesConfig', function () {
+            $(this).is(':checked') ? globals.CONFIG.set('selectChildrenNodes', true) : globals.CONFIG.set('selectChildrenNodes', false);
+            globals.CONFIG.updateConfig();
+        })
+        .on('click', '#archivePathConfigBtn', function () {
+            let folderPath = dialog.showOpenDialogSync(getCurrentWindow(), {
+                properties: ['openDirectory']
+            });
+
+            folderPath = folderPath ? folderPath[0] : folderPath;
+
+            if (folderPath) {
+                if (fs.existsSync(folderPath)) {
+                    globals.CONFIG.set('archive', folderPath);
+                    globals.CONFIG.updateConfig();
+
+                    $('#archivePathConfig').val(folderPath);
+                    $('#archivePathConfigAlertIcon').hide();
+                    $('#showConfigBtnAlertIcon').hide();
+
+                    renderLeftMenuTreeview();
+                } else {
+                    new Alert('Error', 'La ruta especificada no es válida.', Alert.YELLOW_ALERT).spawn();
+                }
+            }
         })
     ;
 }
@@ -237,7 +287,7 @@ function loadUSBTreeDir(mountPath) {
             },
             checkbox: {
                 tie_selection: false,
-                three_state: false,
+                three_state: globals.CONFIG.get('selectChildrenNodes'),
             },
             "plugins": ["checkbox"],
         });
@@ -251,6 +301,7 @@ function loadUSBTreeDir(mountPath) {
  * Función que genera el HTMl del TreeView
  */
 function renderLeftMenuTreeview() {
+    leftMenuTreeView.html('');
     let treeviewStructure = generalProvider.loadArchive();
 
     for (let year of Object.keys(treeviewStructure).sort()) {
@@ -278,8 +329,9 @@ function renderLeftMenuTreeview() {
     }
 }
 
-function renderConfigPanel() {
-    let configPanel = $('#configPanel');
-
-    configPanel.show();
+/**
+ * Función que establece la versión del programa en la UI
+ */
+function setVersion() {
+    $('#version').text('ImageManager | ' + globals.VERSION);
 }

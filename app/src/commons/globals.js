@@ -25,5 +25,6 @@ module.exports = {
     VALID_EXTENSIONS: ['jpeg', 'jpg', 'png', 'bmp', 'webp', 'gif'],
     WHATSAPP_TYPE: 'whatsapp',
     IMAGE_TYPE: 'image',
-    UNKNOWN_TYPE: 'unknown'
+    UNKNOWN_TYPE: 'unknown',
+    VERSION: 'beta-1.0'
 }
