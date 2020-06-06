@@ -1,7 +1,7 @@
 const os = require('os');
 const fs = require('fs');
 const path = require('path');
-const generalProvider = require(path.join(__dirname, 'generalProvider'));
+const commons = require(path.join(__dirname, '../commons/commons'));
 const errors = require(path.join(__dirname, '../commons/error/errors.js'));
 
 const CONFIG_FILE = 'config.json';
@@ -31,7 +31,7 @@ class Store {
     parseData() {
         return new Promise((resolve, reject) => {
             let configPath = this.getConfigPath();
-            generalProvider.checkAndMake(configPath, true);
+            commons.checkAndMake(configPath, true);
 
             if (!fs.existsSync(path.join(configPath, CONFIG_FILE))) {
                 fs.writeFile(path.join(configPath, CONFIG_FILE), JSON.stringify(this.data), function (err) {

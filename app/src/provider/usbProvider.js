@@ -1,6 +1,6 @@
 const globals = require(path.join(__dirname, '../commons/globals'));
 const errors = require(path.join(__dirname, '../commons/error/errors'));
-const generalProvider = require(path.join(__dirname, 'generalProvider'));
+const commons = require(path.join(__dirname, '../commons/commons'));
 const drivelist = require('drivelist');
 const os = require('os');
 
@@ -27,7 +27,7 @@ module.exports = {
                                 loopInterval = setInterval(function () {
                                     retries++;
 
-                                    let dir = generalProvider.getDirectories(linuxMobileMount);
+                                    let dir = commons.getDirectories(linuxMobileMount);
                                     //Se elige el directorio que pertenezca directamente a los datos del telefono, por ejemplo los iPhone crean 2 directorios diferentes
                                     let dirIndex = dir.findIndex((element) => element.includes(device.deviceName)); //Por defecto para dispositivos Android
 
@@ -42,7 +42,7 @@ module.exports = {
                                         }
                                         reject(dir);
                                     } else {
-                                        if (dir.length > 0 && generalProvider.getDirectories(path.join(linuxMobileMount, dir[dirIndex])).length > 0) {
+                                        if (dir.length > 0 && commons.getDirectories(path.join(linuxMobileMount, dir[dirIndex])).length > 0) {
                                             clearInterval(loopInterval);
                                             globals.LOOP_BREAK = false;
                                             resolve(path.join(linuxMobileMount, dir[dirIndex]));

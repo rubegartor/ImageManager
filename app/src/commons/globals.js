@@ -22,9 +22,5 @@ module.exports = {
         '12': 'Dic'
     },
     MONTHS_NAME: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-    VALID_EXTENSIONS: ['jpeg', 'jpg', 'png', 'bmp', 'webp', 'gif'],
-    WHATSAPP_TYPE: 'whatsapp',
-    IMAGE_TYPE: 'image',
-    UNKNOWN_TYPE: 'unknown',
     VERSION: 'beta-1.0'
 }

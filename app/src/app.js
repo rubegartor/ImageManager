@@ -5,14 +5,14 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const usbDetect = require('usb-detection');
-const Store = require(path.join(__dirname, '../src/provider/storeProvider'));
 const globals = require(path.join(__dirname, '../src/commons/globals'));
-const generalProvider = require(path.join(__dirname, '../src/provider/generalProvider'));
-const parserProvider = require(path.join(__dirname, '../src/provider/parserProvider'));
-const usbProvider = require(path.join(__dirname, '../src/provider/usbProvider'));
-const contextMenu = require(path.join(__dirname, '../src/commons/contextMenu'));
-const errors = require(path.join(__dirname, '../src/commons/error/errors'));
+const commons = require(path.join(__dirname, '../src/commons/commons'));
+const Store = require(path.join(__dirname, '../src/model/store'));
 const Alert = require(path.join(__dirname, '../src/model/alert'));
+const Image = require(path.join(__dirname, '../src/model/image'));
+const usbProvider = require(path.join(__dirname, '../src/provider/usbProvider'));
+const contextMenu = require(path.join(__dirname, '../src/commons/contextMenu/contextMenu'));
+const errors = require(path.join(__dirname, '../src/commons/error/errors'));
 const dir2Json = require('dir2Json');
 
 let leftMenuTreeView = $('#treeview');
@@ -125,7 +125,9 @@ function loadMain() {
         let year = $(this).data('year').toString();
         let month = $(this).data('month').toString();
 
-        let files = generalProvider.walkSync(path.join(globals.CONFIG.get('archive'), year, month));
+        let files = commons.walkSync(path.join(globals.CONFIG.get('archive'), year, month));
+        //Se comprueba que los archivos que se leen del directorio son archivos validos
+        let filteredFiles = files.filter(file => Image.VALID_EXTENSIONS.includes(commons.getExtension(file.file)));
         let imageContainer = $('#imageContainer');
 
         //Se eliminan las imagenes para liberar el espacio que ocupaban en la memoria.
@@ -133,19 +135,17 @@ function loadMain() {
             imageObject.remove();
         }
 
-        if (files.length > 0) {
-            for (let image of files) {
-                let imageElement = $('<img>')
-                    .addClass('image')
-                    .attr('src', path.join(image.dir, image.file))
-                ;
-
+        if (filteredFiles.length > 0) {
+            for (let imageSrc of filteredFiles) {
+                let imageElement = new Image(path.join(imageSrc.dir, imageSrc.file)).toHTML();
                 imageContainer.append(imageElement);
             }
-            $('#topTitle').text(year + ' - ' + generalProvider.monthToMonthName(month));
+            $('#topTitle').text(year + ' - ' + commons.monthToMonthName(month));
+            $('[data-action="deleteImage"]').css('display', 'inline');
             $('#noimages').hide();
         } else {
             $('#noimages').show();
+            $('[data-action="deleteImage"]').hide();
         }
     });
 
@@ -171,8 +171,8 @@ function loadMain() {
                     properties: ['openDirectory']
                 });
 
-                if (folderPath && folderPath[0] !== globals.CONFIG.get('archive')) {
-                    let files = generalProvider.walkSync(folderPath[0]);
+                if (folderPath && !folderPath[0].includes(globals.CONFIG.get('archive'))) {
+                    let files = commons.walkSync(folderPath[0]).filter(file => Image.VALID_EXTENSIONS.includes(commons.getExtension(file.file)));
                     let progressBar = $('#countingLoadedFilesProgress');
                     let progressModal = $('#countingLoadedFilesModal');
                     let progressVal = $('#countingLoadedFilesVal');
@@ -181,23 +181,29 @@ function loadMain() {
                         progressBar.val(0);
                         progressBar.attr('max', files.length);
                         progressModal.show();
-                        for (let path of files) {
+                        for (let absPath of files) {
                             setTimeout(function () {
-                                parserProvider.parseDateTime(path.dir, path.file);
-                                progressBar.val(progressBar.val() + 1);
-                                if (progressBar.val() === files.length) {
-                                    progressBar.removeClass('progress-orange').addClass('progress-green');
-                                    $('#countingLoadedFilesContinueBtn').show();
-                                }
-                                progressVal.text('Se han importado ' + progressBar.val() + ' de ' + files.length + ' archivos');
-                            }, files.indexOf(path) * 10); //Arreglo para que funcione el Timeout en el foreach (JS Shit OwO)
+                                let image = new Image(path.join(absPath.dir, absPath.file));
+                                image.parseDateTime().then(function (res) {
+                                    progressBar.val(progressBar.val() + 1);
+                                    if (progressBar.val() === files.length) {
+                                        progressBar.removeClass('progress-orange').addClass('progress-green');
+                                        $('#countingLoadedFilesContinueBtn').show();
+                                    }
+                                    progressVal.text('Se han importado ' + progressBar.val() + ' de ' + files.length + ' archivos');
+                                }).catch(function (err) {
+                                    new Alert('Error', 'No se ha podido importar la imagen: ' + err.filename, Alert.RED_ALERT).spawn();
+                                });
+                            }, files.indexOf(absPath) * 10); //Arreglo para que funcione el Timeout en el foreach (JS Shit OwO)
                         }
                     }
+                } else {
+                    new Alert('Advertencia', 'No se pueden importar imágenes desde el archivo principal de imágenes.', Alert.YELLOW_ALERT).spawn();
                 }
             }
         })
         .on('click', '[data-action="reloadTreeView"]', function () {
-            if(globals.CONFIG.get('archieve') !== undefined) {
+            if (globals.CONFIG.get('archive') !== undefined) {
                 renderLeftMenuTreeview();
             }
         })
@@ -302,7 +308,7 @@ function loadUSBTreeDir(mountPath) {
  */
 function renderLeftMenuTreeview() {
     leftMenuTreeView.html('');
-    let treeviewStructure = generalProvider.loadArchive();
+    let treeviewStructure = commons.loadArchive();
 
     for (let year of Object.keys(treeviewStructure).sort()) {
         let nestedElement = $('<ul>').addClass('treeview-nested');
@@ -312,7 +318,7 @@ function renderLeftMenuTreeview() {
                 nestedElement.append(
                     $('<li>')
                         .addClass('treeview-month')
-                        .text(generalProvider.monthToMonthName(month))
+                        .text(commons.monthToMonthName(month))
                         .attr('data-month', month)
                         .attr('data-year', year)
                 );

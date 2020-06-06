@@ -1,111 +1,242 @@
-//TODO: Implementar la clase Image sobre el app.js
+const jQuery = require('jquery');
+const path = require('path');
+const ExifImage = require('exif').ExifImage;
+const commons = require(path.join(__dirname, '../commons/commons'));
+const globals = require(path.join(__dirname, '../commons/globals'));
+
 class Image {
-    constructor() {
-        this._filename = '';
-        this._extension = '';
-        this._path = '';
-        this._filesize = 0;
-        this._datetime = new Date();
-        this._x = 0;
-        this._y = 0;
+    static VALID_EXTENSIONS = ['jpeg', 'jpg', 'png', 'bmp', 'webp', 'gif'];
+    static WHATSAPP_TYPE = 'whatsapp';
+    static IMAGE_TYPE = 'image';
+    static UNKNOWN_TYPE = 'unknown';
+    static IMAGEMANAGER_TYPE = 'imagemanager';
+
+    constructor(element) {
+        if (element instanceof jQuery) {
+            element = $(element);
+            this.filename = element.data('filename');
+            this.extension = element.data('extension');
+            this.path = element.attr('src');
+            this.filesize = element.data('size');
+            this.datetime = element.data('datetime');
+        } else if (typeof element === "string" || element instanceof String) {
+            let elementStats = fs.statSync(element);
+            if (elementStats.isFile()) {
+                let filePath = element;
+                let fileStats = elementStats;
+
+                this.filename = path.basename(filePath);
+                this.extension = commons.getExtension(filePath);
+                this.path = path.dirname(filePath);
+                this.filesize = fileStats.size;
+                this.datetime = undefined;
+            }
+        }
     }
 
+    _detectTypeOfFile(dir, filename) {
+        let extension = commons.getExtension(filename);
+        let result = null;
+        if (Image.VALID_EXTENSIONS.includes(extension)) {
+            result = this._checkExifType(dir, filename).then(function () {
+                return {
+                    'type': Image.IMAGE_TYPE
+                };
+            }).catch(function (err) {
+                if (this._checkWhatsAppType(filename)) {
+                    result = {
+                        'type': Image.WHATSAPP_TYPE
+                    };
+                } else if (this._checkImageManagerType(filename)) {
+                    result = {
+                        'type': Image.IMAGEMANAGER_TYPE
+                    };
+                } else {
+                    result = {
+                        'type': Image.UNKNOWN_TYPE,
+                        'processData': {
+                            'dir': dir,
+                            'filename': filename,
+                            'extension': extension
+                        }
+                    };
+                }
 
-    /**
-     * @returns {string}
-     */
-    get filename() {
-        return this._filename;
+                return result;
+            }.bind(this));
+        }
+
+        return result;
     }
 
-    /**
-     * @param {string} value
-     */
-    set filename(value) {
-        this._filename = value;
+    _checkExifType(dir, file) {
+        return new Promise((resolve, reject) => {
+            ExifImage(path.join(dir, file), (err) => {
+                err ? reject(err) : resolve(null);
+            });
+        });
     }
 
-    /**
-     * @returns {string}
-     */
-    get extension() {
-        return this._extension;
+    _checkWhatsAppType(file) {
+        return new RegExp(/^IMG-\d{8}-WA\d{4}\.\w*/).test(file);
     }
 
-    /**
-     * @param {string} value
-     */
-    set extension(value) {
-        this._extension = value;
+    _checkImageManagerType(file) {
+        return new RegExp(/(\d{2})-(\d{2})-(\d{4}).(\d{13})/).test(file);
     }
 
-    /**
-     * @returns {string}
-     */
-    get path() {
-        return this._path;
+    _getExif(dir, file) {
+        return new Promise((resolve, reject) => {
+            ExifImage(path.join(dir, file), (err, data) => {
+                try {
+                    let datePortions = undefined;
+
+                    if (!commons.isEmpty(data.exif)) {
+                        let date = data.exif.DateTimeOriginal.split(' ');
+                        datePortions = date[0].split(':').join('/') + ' ' + date[1];
+                    } else if (!commons.isEmpty(data.image)) {
+                        let date = data.image.ModifyDate.split(' ');
+                        datePortions = date[0].split(':').join('/') + ' ' + date[1];
+                    }
+
+                    if (datePortions === undefined) {
+                        reject(path.join(dir, file));
+                    } else {
+                        resolve({filename: file, datetime: new Date(datePortions)});
+                    }
+                } catch (e) {
+                    throw new Error('No se ha podido extraer la información EXIF del siguiente archivo: ' + path.join(dir, file));
+                }
+            });
+        });
     }
 
-    /**
-     * @param {string} value
-     */
-    set path(value) {
-        this._path = value;
+    _getWhatsAppImageDate(file) {
+        let unformatedDate = file.split('-')[1];
+        return {
+            'day': unformatedDate.substring(6, 8),
+            'month': unformatedDate.substring(4, 6),
+            'year': unformatedDate.substring(0, 4)
+        };
     }
 
-    /**
-     * @returns {number}
-     */
-    get filesize() {
-        return this._filesize;
+    parseDateTime() {
+        return new Promise((resolve, reject) => {
+            let promiseDetectTypeOfFile = this._detectTypeOfFile(this.path, this.filename);
+            if (promiseDetectTypeOfFile) {
+                let promiseRes = promiseDetectTypeOfFile.then(function (res) {
+                    switch (res.type) {
+                        case Image.IMAGE_TYPE:
+                            return this.copyImageType().then((r) => {
+                                return r;
+                            });
+                        case Image.WHATSAPP_TYPE:
+                            return this.copyWhatsAppType();
+                        case Image.IMAGEMANAGER_TYPE:
+                            return this.copyImageManagerType();
+                        case Image.UNKNOWN_TYPE:
+                            //Baia baia, me cachis, kasemo' aquí?
+                            break;
+                    }
+                }.bind(this));
+
+                if (promiseRes instanceof Promise) {
+                    promiseRes.then((r) => {
+                        r.err ? reject(r) : resolve(r);
+                    });
+                } else {
+                    promiseRes.err ? reject(promiseRes) : resolve(promiseRes);
+                }
+            }
+        });
     }
 
-    /**
-     * @param {number} value
-     */
-    set filesize(value) {
-        this._filesize = value;
+    copyImageType() {
+        return this._getExif(this.path, this.filename).then(r => {
+            let fileExtension = commons.getExtension(this.filename);
+            let date = {
+                'day': ('0' + r.datetime.getDate()).slice(-2),
+                'month': r.datetime.getMonth() + 1,
+                'year': r.datetime.getFullYear(),
+                'time': r.datetime.getTime()
+            };
+
+            let formatedDateTime = date.day + '-' + date.month + '-' + date.year + '.' + date.time;
+            let finalPath = commons.checkAndMake(path.join(
+                globals.CONFIG.get('archive'),
+                date.year.toString(),
+                date.month.toString() + ' ' + globals.MONTHS[date.month]));
+
+            this.datetime = r.datetime;
+
+            fs.copyFileSync(path.join(this.path, this.filename), path.join(finalPath, formatedDateTime + '.' + fileExtension));
+
+            return {'err': false};
+        }).catch(err => {
+            return {'err': true, 'message': err};
+        });
     }
 
-    /**
-     * @returns {number}
-     */
-    get x() {
-        return this._x;
+    copyWhatsAppType() {
+        try {
+            let fileExtension = commons.getExtension(this.filename);
+            let date = this._getWhatsAppImageDate(this.filename);
+            let dateObject = new Date(parseInt(date.year), parseInt(date.month), parseInt(date.day));
+
+            let formatedDate = date.day + '-' + date.month + '-' + date.year;
+            let finalPath = commons.checkAndMake(path.join(globals.CONFIG.get('archive'),
+                date.year.toString(),
+                date.month.toString() + ' ' + globals.MONTHS[date.month]));
+
+            this.datetime = dateObject;
+
+            fs.copyFileSync(path.join(this.path, this.filename), path.join(finalPath, formatedDate + '.' + fileExtension));
+
+            return {'err': false};
+        } catch (err) {
+            return {'err': true, 'message': err};
+        }
     }
 
-    /**
-     * @param {number} value
-     */
-    set x(value) {
-        this._x = value;
+    copyImageManagerType() {
+        try {
+            let fileExtension = commons.getExtension(this.filename);
+
+            let date = {
+                'day': this.filename.substring(0, 2),
+                'month': this.filename.substring(3, 5),
+                'year': this.filename.substring(6, 10)
+            };
+
+            this.datetime = new Date(date.year + '-' + date.month + '-' + date.day);
+
+            let formatedDateTime = date.day + '-' + date.month + '-' + date.year;
+
+            let finalPath = commons.checkAndMake(path.join(globals.CONFIG.get('archive'),
+                date.year.toString(),
+                date.month.toString() + ' ' + globals.MONTHS[date.month]));
+
+            fs.copyFileSync(path.join(this.path, this.filename), path.join(finalPath, formatedDateTime + '.' + fileExtension));
+
+            return {'err': false};
+        } catch (err) {
+            return {'err': true, 'message': err};
+        }
     }
 
-    /**
-     * @returns {number}
-     */
-    get y() {
-        return this._y;
-    }
-
-    /**
-     * @param {number} value
-     */
-    set y(value) {
-        this._y = value;
-    }
-
-    /**
-     * @return {Date}
-     */
-    get datetime() {
-        return this._datetime;
-    }
-
-    /**
-     * @param {Date} value
-     */
-    set datetime(value) {
-        this._datetime = value;
+    toHTML() {
+        return $('<img>')
+            .addClass('image')
+            .attr({
+                'src': path.join(this.path, this.filename),
+                'data-filename': this.filename,
+                'data-extension': commons.getExtension(this.filename),
+                'data-path': this.path,
+                'data-size': this.filesize,
+                'data-datetime': this.datetime
+            })
+            ;
     }
 }
+
+module.exports = Image;
