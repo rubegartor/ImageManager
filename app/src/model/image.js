@@ -208,13 +208,13 @@ class Image {
                 'year': this.filename.substring(6, 10)
             };
 
-            this.datetime = new Date(date.year + '-' + date.month + '-' + date.day);
-
             let formatedDateTime = date.day + '-' + date.month + '-' + date.year;
 
             let finalPath = commons.checkAndMake(path.join(globals.CONFIG.get('archive'),
                 date.year.toString(),
                 date.month.toString() + ' ' + globals.MONTHS[date.month]));
+
+            this.datetime = new Date(date.year + '-' + date.month + '-' + date.day);
 
             fs.copyFileSync(path.join(this.path, this.filename), path.join(finalPath, formatedDateTime + '.' + fileExtension));
 
@@ -224,6 +224,11 @@ class Image {
         }
     }
 
+    /**
+     * Devuelve el elemento de la miniatura de la imagen
+     *
+     * @return {jQuery}
+     */
     toHTML() {
         return $('<img>')
             .addClass('image')
@@ -234,8 +239,32 @@ class Image {
                 'data-path': this.path,
                 'data-size': this.filesize,
                 'data-datetime': this.datetime
-            })
-            ;
+            });
+    }
+
+    /**
+     * Devuelve los elementos necesarios para la previsualizacion de una imagen
+     *
+     * @return {(jQuery|jQuery)[]}
+     */
+    previsualize() {
+        let thumbnailSrc = path.join(this.path, this.filename);
+
+        let prevImgBtn = $('<a>')
+            .attr('data-action', 'showPrevImage')
+            .addClass('prev')
+            .html('<i class="fas fa-chevron-left"></i>');
+
+        let nextImgBtn = $('<a>')
+            .attr('data-action', 'showNextImage')
+            .addClass('next')
+            .html('<i class="fas fa-chevron-right"></i>');
+
+        let newImage = $('<img>')
+            .attr('src', thumbnailSrc)
+            .addClass('openImage');
+
+        return [newImage, prevImgBtn, nextImgBtn];
     }
 }
 

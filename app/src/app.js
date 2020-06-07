@@ -23,7 +23,7 @@ globals.CONFIG = new Store();
 globals.CONFIG.parseData().then(function () {
     loadMain();
 }).catch(function (err) {
-
+    process.exit(1);
 });
 
 function loadMain() {
@@ -58,7 +58,6 @@ function loadMain() {
         usbDetect.startMonitoring();
 
         usbDetect.on('add', (device) => {
-            console.log(device);
             if (!globals.DEVICES_PIDS.some(dev => dev.pid === device.productId)) {
                 globals.LOOP_BREAK = false;
                 globals.DEVICES_PIDS.push({'pid': device.productId, 'mountpoint': undefined});
@@ -198,7 +197,7 @@ function loadMain() {
                         }
                     }
                 } else {
-                    new Alert('Advertencia', 'No se pueden importar imágenes desde el archivo principal de imágenes.', Alert.YELLOW_ALERT).spawn();
+                    if (folderPath) new Alert('Advertencia', 'No se pueden importar imágenes desde el archivo principal de imágenes.', Alert.YELLOW_ALERT).spawn();
                 }
             }
         })
@@ -209,21 +208,35 @@ function loadMain() {
         })
         .on('click', '.image', function (e) {
             $(window).trigger('imageOpen');
-            let thumbnailSrc = $(e.target).attr('src');
-
-            let newImage = $('<img>')
-                .attr('src', thumbnailSrc)
-                .addClass('openImage')
-            ;
 
             let openImage = $('#openImage');
-
             openImage.html('');
-            openImage
-                .append(newImage)
-            ;
+
+            let image = new Image($(e.target).attr('src'));
+
+            for (let elem of image.previsualize()) {
+                openImage.append(elem);
+            }
 
             $('.openImage-container').fadeIn('fast');
+        })
+        //Evento para navegar entre las imágenes (Previsualizar anterior)
+        .on('click', '[data-action="showPrevImage"]', function () {
+            let previewedImage = $('.openImage');
+            let prevImage = $('.image[src="' + previewedImage.attr('src') + '"]').prev();
+
+            if (prevImage.length > 0) {
+                previewedImage.removeAttr('src').attr('src', prevImage.attr('src'));
+            }
+        })
+        //Evento para navegar entre las imágenes (Previsualizar siguiente)
+        .on('click', '[data-action="showNextImage"]', function () {
+            let previewedImage = $('.openImage');
+            let nextImage = $('.image[src="' + previewedImage.attr('src') + '"]').next();
+
+            if (nextImage.length > 0) {
+                previewedImage.removeAttr('src').attr('src', nextImage.attr('src'));
+            }
         })
         .on('click', '.openImage-container', function (e) {
             if (e.target !== e.currentTarget) return;
@@ -278,6 +291,10 @@ function loadMain() {
     ;
 }
 
+/**
+ * Función para cargar el TreeView de los directorios de los dispositivos conectados por USB
+ * @param mountPath
+ */
 function loadUSBTreeDir(mountPath) {
     dir2Json(mountPath).then(function (jsonTree) {
         jsTreeViewElement.jstree("destroy").empty();

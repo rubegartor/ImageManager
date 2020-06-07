@@ -283,6 +283,38 @@ hr {
     margin: auto;
     border-radius: 3px;
   }
+
+  .prev {
+    opacity: 0.2;
+    position: absolute;
+    top: calc(50% - 1.75em);
+    left: 10px;
+
+    i {
+      color: white;
+      font-size: 3.5em;
+    }
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  .next {
+    opacity: 0.2;
+    position: absolute;
+    top: calc(50% - 1.75em);
+    right: 10px;
+
+    i {
+      color: white;
+      font-size: 3.5em;
+    }
+
+    &:hover {
+      opacity: 1;
+    }
+  }
 }
 
 .configPanel {
