@@ -156,7 +156,7 @@ class Image {
             let fileExtension = commons.getExtension(this.filename);
             let date = {
                 'day': ('0' + r.datetime.getDate()).slice(-2),
-                'month': r.datetime.getMonth() + 1,
+                'month': ('0' + (r.datetime.getMonth() + 1)).slice(-2),
                 'year': r.datetime.getFullYear(),
                 'time': r.datetime.getTime()
             };
