@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>ImageManager</title>
-    <meta http-equiv="Content-Security-Policy" content="default-src * data: 'unsafe-eval' 'unsafe-inline' blob:"/>
+    <!--<meta http-equiv="Content-Security-Policy" content="default-src * data: 'unsafe-eval' 'unsafe-inline' blob:"/>-->
     <link rel="stylesheet" type="text/css" href="../assets/css/app.css">
     <link rel="stylesheet" type="text/css" href="../assets/css/proton/style.min.css">
+    <link href="https://vjs.zencdn.net/7.8.4/video-js.css" rel="stylesheet" />
+    <script src="https://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script>
 </head>
 <body>
 <div class="contextmenu" id="contextmenu">
@@ -17,7 +19,7 @@
     <div class="content">
         <div class="title mb-15">Importación de archivos</div>
         <progress max="100" value="0" class="progress-orange" id="countingLoadedFilesProgress"></progress>
-        <div class="d-flex justify-content-center mt-10" id="countingLoadedFilesVal"></div>
+        <div class="d-flex justify-content-center mt-10 text-center" id="countingLoadedFilesVal"></div>
         <div class="d-flex justify-content-center">
             <button type="button" class="btn btn-green btn-bold d-none mt-15" id="countingLoadedFilesContinueBtn"><i
                     class="fas fa-check mr-5"></i> Continuar
@@ -34,8 +36,8 @@
         <div class="d-none postLoadingContent-icon">
             <div id="jsTreeView"></div>
             <div class="d-flex justify-content-end">
-                <button type="button" class="btn btn-primary btn-bold mt-20"><i class="fab fa-usb mr-5"></i>Procesar
-                    archivos
+                <button type="button" class="btn btn-primary btn-bold mt-20" data-action="processUSBFilesBtn">
+                    <i class="fab fa-usb mr-5"></i>Procesar archivos
                 </button>
             </div>
         </div>
@@ -88,28 +90,13 @@
         </div>
         <div class="mt-30"></div>
         <div class="ml-20 mr-20 d-none" id="rightSidebarConfig">
-            <hr class="hr-dark mb-25">
-            <div class="d-flex align-items-center">
-                <span class="text-dark mr-20">Seleccionar los nodos hijos al seleccionar el nodo padre</span>
-                <label class="switch-wrap config-switch">
-                    <input type="checkbox" id="selectChildrenNodesConfig" />
-                    <div class="switch"></div>
-                </label>
-            </div>
-            <hr class="hr-dark mt-25 mb-25">
-            <div class="d-flex align-items-center">
-                <span class="text-dark mr-20">Eliminar imágenes de la caché <small>(Recomendado)</small></span>
-                <label class="switch-wrap config-switch">
-                    <input type="checkbox" id="optimizeImageMemoryConfig" />
-                    <div class="switch"></div>
-                </label>
-            </div>
             <hr class="hr-dark mt-25 mb-25">
             <div>
                 <span class="text-dark">Ruta del archivo de imágenes:</span>
                 <div class="d-flex mt-5 align-items-center">
-                    <i class="fas fa-lg fa-exclamation-circle text-light-orange d-none mr-10" id="archivePathConfigAlertIcon"></i>
-                    <input type="text" class="form-control outline-red mr-10" id="archivePathConfig" />
+                    <i class="fas fa-lg fa-exclamation-circle text-light-orange d-none mr-10"
+                       id="archivePathConfigAlertIcon"></i>
+                    <input type="text" class="form-control outline-red mr-10" id="archivePathConfig"/>
                     <button type="button" class="btn btn-bold btn-primary" id="archivePathConfigBtn">...</button>
                 </div>
             </div>
@@ -127,6 +114,10 @@
     <div class="top-container d-flex justify-content-between">
         <div class="title vertical-align ml-30" id="topTitle"></div>
         <div class="vertical-align">
+            <button type="button" class="btn btn-light-orange btn-round mr-15 blink d-none"
+                    data-action="viewImagesErrors">
+                <i class="fas fa-exclamation"></i>
+            </button>
             <button type="button" class="btn btn-dark btn-round mr-15 d-none" data-action="deleteImage">
                 <i class="fas fa-check-square"></i>
             </button>
@@ -136,6 +127,21 @@
         </div>
     </div>
     <div class="full-container">
+        <audio controls>
+            <source src="/home/ruben/Escritorio/file_example_MP3_1MG.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        <video
+            id="my-video"
+            class="video-js"
+            controls
+            preload="auto"
+            width="640"
+            height="264"
+            data-setup="{}"
+        >
+            <source src="/home/ruben/Escritorio/transformedImages/2019/01 Ene/01-01-2019.mp4" type="video/mp4" />
+        </video>
         <div class="d-flex justify-content-center noimages" id="noimages">
             <span class="text-dark">No hay imágenes para mostrar</span>
         </div>

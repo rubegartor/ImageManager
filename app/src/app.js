@@ -4,6 +4,8 @@ const {dialog, getCurrentWindow} = require('electron').remote;
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+const ffmpeg = require('ffmpeg-static');
+const genThumbnail = require('simple-thumbnail');
 const usbDetect = require('usb-detection');
 const globals = require(path.join(__dirname, '../src/commons/globals'));
 const commons = require(path.join(__dirname, '../src/commons/commons'));
@@ -36,16 +38,6 @@ function loadMain() {
         $('#archivePathConfigAlertIcon').show();
     }
 
-    if (globals.CONFIG.get('optimizeImageMemory')) {
-        let element = $('#optimizeImageMemoryConfig');
-        element.next().trigger('click');
-    }
-
-    if (globals.CONFIG.get('selectChildrenNodes')) {
-        let element = $('#selectChildrenNodesConfig');
-        element.next().trigger('click');
-    }
-
     console.log('=== DEBUG INFO ===');
     console.log('OS Platform: ' + os.platform());
     console.log('User UID: ' + os.userInfo().uid);
@@ -56,6 +48,9 @@ function loadMain() {
         setVersion();
         contextMenu.createContextMenus();
         usbDetect.startMonitoring();
+
+        const audio = new Audio("/home/ruben/Escritorio/file_example_MP3_1MG.mp3");
+        audio.play();
 
         usbDetect.on('add', (device) => {
             if (!globals.DEVICES_PIDS.some(dev => dev.pid === device.productId)) {
@@ -131,13 +126,31 @@ function loadMain() {
 
         //Se eliminan las imagenes para liberar el espacio que ocupaban en la memoria.
         for (let imageObject of imageContainer.children()) {
+            //TODO: Eliminar las miniaturas de los videos generadas sobre /tmp
             imageObject.remove();
         }
 
         if (filteredFiles.length > 0) {
             for (let imageSrc of filteredFiles) {
-                let imageElement = new Image(path.join(imageSrc.dir, imageSrc.file)).toHTML();
-                imageContainer.append(imageElement);
+                //Si el la extension del archivo pertenece a la de un video aceptado por la app
+                if(Image.VIDEO_EXTENSIONS.includes(commons.getExtension(imageSrc.file))) {
+                    let uuid = commons.generateUUID();
+                    let filenameWithoutExtension = commons.getFilenameWithoutExtension(imageSrc.file);
+                    let THUMBNAIL_EXTENSION = 'png';
+
+                    //Se crea el directorio unico sobre /tmp en el que se alamacenará temporalmente la miniatura del video
+                    commons.checkAndMake(path.join(os.tmpdir(), uuid));
+                    //Se genera la miniatura del video
+                    genThumbnail(path.join(imageSrc.dir, imageSrc.file), path.join(os.tmpdir(), uuid, filenameWithoutExtension + '.' + THUMBNAIL_EXTENSION), '150x80', {path: ffmpeg.path})
+                        .then(() => {
+                            let imageElement = new Image(path.join(os.tmpdir(), uuid, filenameWithoutExtension + '.' + THUMBNAIL_EXTENSION)).toHTML();
+                            imageContainer.append(imageElement);
+                        })
+                        .catch(err => console.error(err));
+                } else { //Si el archivo pertene a una imagen
+                    let imageElement = new Image(path.join(imageSrc.dir, imageSrc.file)).toHTML();
+                    imageContainer.append(imageElement);
+                }
             }
             $('#topTitle').text(year + ' - ' + commons.monthToMonthName(month));
             $('[data-action="deleteImage"]').css('display', 'inline');
@@ -164,6 +177,43 @@ function loadMain() {
             $('.modal').fadeOut('fast');
         })
         .on('click', '[data-action="loadFiles"]', function () {
+            /**
+             * Función para actualizar el progreso de la importación de imágenes
+             *
+             * @param progressBar
+             * @param progressVal
+             * @param files
+             * @param importImagesErrors
+             * @private
+             */
+            function _updateProgressBar(progressBar, progressVal, files, importImagesErrors) {
+                progressBar.val(progressBar.val() + 1);
+                if (progressBar.val() === files.length) {
+                    progressBar.removeClass('progress-orange').addClass('progress-green');
+                    $('#countingLoadedFilesContinueBtn').show();
+
+                    _onFinished(importImagesErrors);
+                    if(importImagesErrors.length > 0) {
+                        progressVal.text('Se han importado ' + (parseInt(progressBar.val()) - importImagesErrors.length) + ' de ' + files.length + ' archivos. (' + importImagesErrors.length + ' imágenes no se han podido importar)');
+                    }
+                } else{
+                    progressVal.text('Se han importado ' + progressBar.val() + ' de ' + files.length + ' archivos');
+                }
+            }
+
+            /**
+             * Función que se ejecuta al finalizar la importación de las imágenes
+             *
+             * @param importImagesErrors
+             * @private
+             */
+            function _onFinished(importImagesErrors) {
+                //Si ha ocurrido algún error al importar alguna imágen
+                if(importImagesErrors.length > 0) {
+                    $('[data-action="viewImagesErrors"]').removeClass('d-none');
+                }
+            }
+
             if (globals.CONFIG.get('archive') !== undefined) {
                 $(window).trigger('modalShow');
                 let folderPath = dialog.showOpenDialogSync(getCurrentWindow(), {
@@ -177,21 +227,18 @@ function loadMain() {
                     let progressVal = $('#countingLoadedFilesVal');
 
                     if (files.length >= 1) {
+                        let importImagesErrors = [];
                         progressBar.val(0);
                         progressBar.attr('max', files.length);
                         progressModal.show();
                         for (let absPath of files) {
                             setTimeout(function () {
                                 let image = new Image(path.join(absPath.dir, absPath.file));
-                                image.parseDateTime().then(function (res) {
-                                    progressBar.val(progressBar.val() + 1);
-                                    if (progressBar.val() === files.length) {
-                                        progressBar.removeClass('progress-orange').addClass('progress-green');
-                                        $('#countingLoadedFilesContinueBtn').show();
-                                    }
-                                    progressVal.text('Se han importado ' + progressBar.val() + ' de ' + files.length + ' archivos');
+                                image.parseDateTime().then(function () {
+                                    _updateProgressBar(progressBar, progressVal, files, importImagesErrors);
                                 }).catch(function (err) {
-                                    new Alert('Error', 'No se ha podido importar la imagen: ' + err.filename, Alert.RED_ALERT).spawn();
+                                    importImagesErrors.push(err);
+                                    _updateProgressBar(progressBar, progressVal, files, importImagesErrors);
                                 });
                             }, files.indexOf(absPath) * 10); //Arreglo para que funcione el Timeout en el foreach (JS Shit OwO)
                         }
@@ -258,14 +305,6 @@ function loadMain() {
         .on('click', '[data-action="showConfig"]', function () {
             $('#rightSidebarConfig').toggle('fast');
         })
-        .on('change', '#optimizeImageMemoryConfig', function () {
-            $(this).is(':checked') ? globals.CONFIG.set('optimizeImageMemory', true) : globals.CONFIG.set('optimizeImageMemory', false);
-            globals.CONFIG.updateConfig();
-        })
-        .on('change', '#selectChildrenNodesConfig', function () {
-            $(this).is(':checked') ? globals.CONFIG.set('selectChildrenNodes', true) : globals.CONFIG.set('selectChildrenNodes', false);
-            globals.CONFIG.updateConfig();
-        })
         .on('click', '#archivePathConfigBtn', function () {
             let folderPath = dialog.showOpenDialogSync(getCurrentWindow(), {
                 properties: ['openDirectory']
@@ -283,10 +322,15 @@ function loadMain() {
                     $('#showConfigBtnAlertIcon').hide();
 
                     renderLeftMenuTreeview();
+
+                    new Alert('Configuración', 'Se ha guardado la nueva ruta.', Alert.GREEN_ALERT).spawn();
                 } else {
                     new Alert('Error', 'La ruta especificada no es válida.', Alert.YELLOW_ALERT).spawn();
                 }
             }
+        })
+        .on('click', '[data-action="processUSBFilesBtn"]', function() {
+            //TODO: Desarrollar la importacion de imagenes de un dispositivo USB autodetectado
         })
     ;
 }

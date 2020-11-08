@@ -13,7 +13,8 @@ function createWindow () {
         title: 'ImageManager',
         resizable: true,
         webPreferences: {
-            nodeIntegration: true
+            nodeIntegration: true,
+            webSecurity: false
         }
     });
 

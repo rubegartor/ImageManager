@@ -15,6 +15,18 @@ module.exports = {
         return result;
     },
 
+    getFilenameWithoutExtension: function(file) {
+        let result = undefined;
+
+        try {
+            result = file.split('.')[0];
+        } catch (err) {
+            throw err;
+        }
+
+        return result;
+    },
+
     isEmpty: function (object) {
         return Object.keys(object).length === 0;
     },
@@ -68,5 +80,12 @@ module.exports = {
         } catch (e) {
             return new errors.fsError();
         }
+    },
+
+    generateUUID: function () {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            let r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
     }
 }

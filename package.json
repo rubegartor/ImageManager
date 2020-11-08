@@ -22,11 +22,14 @@
     "dir2Json": "https://github.com/rubegartor/dir-to-json.git",
     "drivelist": "^8.0.10",
     "exif": "^0.6.0",
+    "ffmpeg-static": "^4.2.7",
     "jquery": "^3.5.0",
     "jstree": "^3.3.9",
     "jstree-bootstrap-theme": "^1.0.1",
     "node-sass": "^4.13.1",
-    "usb-detection": "^4.9.0"
+    "simple-thumbnail": "^1.6.5",
+    "usb-detection": "^4.9.0",
+    "video.js": "^7.10.2"
   },
   "build": {
     "appId": "imagemanager",

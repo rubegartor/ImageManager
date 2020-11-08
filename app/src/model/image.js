@@ -5,9 +5,12 @@ const commons = require(path.join(__dirname, '../commons/commons'));
 const globals = require(path.join(__dirname, '../commons/globals'));
 
 class Image {
-    static VALID_EXTENSIONS = ['jpeg', 'jpg', 'png', 'bmp', 'webp', 'gif'];
+    static IMAGE_EXTENSIONS = ['jpeg', 'jpg', 'png', 'bmp', 'webp', 'gif'];
+    static VIDEO_EXTENSIONS = ['mp4'];
+    static VALID_EXTENSIONS = Image.IMAGE_EXTENSIONS.concat(Image.VIDEO_EXTENSIONS);
     static WHATSAPP_TYPE = 'whatsapp';
     static IMAGE_TYPE = 'image';
+    static WHATSAPP_VIDEO_TYPE = 'whatsappVideo';
     static UNKNOWN_TYPE = 'unknown';
     static IMAGEMANAGER_TYPE = 'imagemanager';
 
@@ -51,6 +54,10 @@ class Image {
                     result = {
                         'type': Image.IMAGEMANAGER_TYPE
                     };
+                } else if (this._checkWhatsAppVideoType(filename)) {
+                    result = {
+                        'type': Image.WHATSAPP_VIDEO_TYPE
+                    };
                 } else {
                     result = {
                         'type': Image.UNKNOWN_TYPE,
@@ -81,6 +88,10 @@ class Image {
         return new RegExp(/^IMG-\d{8}-WA\d{4}\.\w*/).test(file);
     }
 
+    _checkWhatsAppVideoType(file) {
+        return new RegExp(/^VID-\d{8}-WA\d{4}\.\w*/).test(file);
+    }
+
     _checkImageManagerType(file) {
         return new RegExp(/(\d{2})-(\d{2})-(\d{4}).(\d{13})/).test(file);
     }
@@ -105,13 +116,13 @@ class Image {
                         resolve({filename: file, datetime: new Date(datePortions)});
                     }
                 } catch (e) {
-                    throw new Error('No se ha podido extraer la información EXIF del siguiente archivo: ' + path.join(dir, file));
+                    reject('No se ha podido extraer la información EXIF del siguiente archivo: ' + path.join(dir, file));
                 }
             });
         });
     }
 
-    _getWhatsAppImageDate(file) {
+    _getWhatsAppImageOrVideoDate(file) {
         let unformatedDate = file.split('-')[1];
         return {
             'day': unformatedDate.substring(6, 8),
@@ -131,12 +142,13 @@ class Image {
                                 return r;
                             });
                         case Image.WHATSAPP_TYPE:
-                            return this.copyWhatsAppType();
+                            return this.copyWhatsAppImageOrVideoType();
+                        case Image.WHATSAPP_VIDEO_TYPE:
+                            return this.copyWhatsAppImageOrVideoType();
                         case Image.IMAGEMANAGER_TYPE:
                             return this.copyImageManagerType();
                         case Image.UNKNOWN_TYPE:
-                            //Baia baia, me cachis, kasemo' aquí?
-                            break;
+                            return {'err': true, 'message': 'No se ha encontrado el patrón para ordenar esta imágen.'};
                     }
                 }.bind(this));
 
@@ -177,10 +189,10 @@ class Image {
         });
     }
 
-    copyWhatsAppType() {
+    copyWhatsAppImageOrVideoType() {
         try {
             let fileExtension = commons.getExtension(this.filename);
-            let date = this._getWhatsAppImageDate(this.filename);
+            let date = this._getWhatsAppImageOrVideoDate(this.filename);
             let dateObject = new Date(parseInt(date.year), parseInt(date.month), parseInt(date.day));
 
             let formatedDate = date.day + '-' + date.month + '-' + date.year;

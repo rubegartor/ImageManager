@@ -373,3 +373,20 @@ hr {
   flex-grow: 0;
   align-items: center;
 }
+
+.blink {
+  animation: blink-animation 1s steps(15, start) infinite;
+  -webkit-animation: blink-animation 1s steps(15, start) infinite;
+}
+
+@keyframes blink-animation {
+  to {
+    opacity: 0.2;
+  }
+}
+
+@-webkit-keyframes blink-animation {
+  to {
+    opacity: 0.2;
+  }
+}
